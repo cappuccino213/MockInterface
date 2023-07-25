@@ -1,0 +1,5 @@
+# 运行参数
+[uvicorn]
+port = 8888
+reload = true # 是否重载
+process_num = 4 # 进程数
