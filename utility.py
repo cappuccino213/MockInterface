@@ -17,6 +17,8 @@ from mimesis import Datetime
 
 from pydicom.uid import generate_uid
 
+from config import CONFIG
+
 """工具模块"""
 
 
@@ -28,19 +30,10 @@ class FakeData:
         self.m_random = Random()  # 随机对象
         self.tel_phone_header = ['182', '138', '139', '159', '189', '158']
 
-    def person_info(self):
-        person_dict = dict(name=self.person.full_name(reverse=True).replace(' ', ''),
-                           sex=self.person.sex(),
-                           age=self.person.age(0, 100),
-                           phone=self.m_random.choice_enum_item(self.tel_phone_header) + self.person.phone_number(
-                               '########'),
-                           occupation=self.person.occupation())
-        person_dict['birth'] = (datetime.datetime.now().date() - relativedelta(years=person_dict['age'])).strftime(
-            "%Y-%m-%d")
-
-        return person_dict
+    # 通用方法
 
     # 号码生成
+
     def multi_type_number(self, num_type, **params):
         if num_type == 'uuid':
             return Cryptographic().uuid()
@@ -50,15 +43,81 @@ class FakeData:
             return generate_uid()
 
     # 随机生成字符串
+
     def random_string(self, enum_str: list[str]):
         return self.m_random.choice_enum_item(enum_str)
 
     # 随机生成时间
-    def random_date_time(self, date_type):
+
+    def random_date_time(self, date_type, start=CONFIG['mockup']['year']['start'], end=CONFIG['mockup']['year']['end']):
+        # start = CONFIG['mockup']['year']['start']
+        # end = CONFIG['mockup']['year']['end']
         if date_type == 'date':
-            return self.dt.date(start=2022, end=2023).strftime("%Y-%m-%d")
+            return self.dt.date(start=start, end=end).strftime("%Y-%m-%d")
         if date_type == 'time':
-            return self.dt.datetime(start=2022, end=2023).strftime("%Y-%m-%d %H:%M:%S.%f")
+            return self.dt.datetime(start=start, end=end).strftime("%Y-%m-%d %H:%M:%S.%f")
+
+    def identify_code(self, birth):
+        """
+        :param birth: 出生日期8位,格式为20000214
+        :return: 18位身份证号
+        """
+        areacode = self.random_string(CONFIG['mockup']['areacode'])
+        # 3位顺序码
+        sequence_code = self.random_string([str(code) for code in (100, 300)])
+        # 校验码，实际校验码需要根据前17位进行加权计算的，这里我们建议枚举处理
+        check_code = self.random_string([str(i) for i in range(9)] + ['X'])
+        return areacode + birth + sequence_code + check_code
+
+    # 具体业务数据
+    def person_info(self):
+        person_dict = dict(name=self.person.full_name(reverse=True).replace(' ', ''),
+                           sex=self.person.sex(),
+                           age=self.person.age(CONFIG['mockup']['age']['start'], CONFIG['mockup']['age']['end']),
+                           ageUnit='岁',
+                           phone=self.m_random.choice_enum_item(self.tel_phone_header) + self.person.phone_number(
+                               '########'),
+                           occupation=self.person.occupation(),
+                           nation='中华人民共和国',
+                           nationality='汉族',
+                           maritalStatus=self.random_string(['已婚', '未婚']))
+        person_dict['birth'] = (datetime.datetime.now().date() - relativedelta(years=person_dict['age'])).strftime(
+            "%Y-%m-%d")
+        person_dict['ID'] = self.identify_code(person_dict['birth'].replace('-', ''))
+
+        return person_dict
+
+    # 医疗信息相关
+    def medical_info(self):
+        medical_dict = dict(
+            medrecNo=self.multi_type_number('custom', **dict(mask='######')),  # 病历号
+            outPatientNO='',  # 门诊号
+            inPatientNO='',  # 住院号
+            patientID=self.multi_type_number('custom', **dict(mask='########')),  # 患者编号
+            # accessionNumber='',  # 检查编号
+            invoiceNO='',  # 发票号
+            cardSelfNO='',  # 卡号
+            placerOrderNO=self.multi_type_number('custom', **dict(mask='pon######')),  # 申请单号
+            insuranceID=self.multi_type_number('custom', **dict(mask='YB########')),  # 医保号
+            insuranceType=self.random_string(['医保', '农保']),  # 医保类型
+            clinicDiagnosis='临床诊断的测试文本内容',  # 临床诊断,
+            symptom='患者症状的描述',  # 症状
+            charges=88.0,  # 费用
+            requestDepName='申请科室名称',  # 申请科室
+            # providerName='',  # 申请医生名
+            patientClass=self.random_string(['1000', '2000', '3000', '4000']),
+            serviceSectID=self.random_string(['CR', 'DR', 'CT', 'RF', 'XA', 'MR', 'MG']),
+            procedureCode='0' + self.random_string([str(i) for i in range(1001, 2000)]),
+            procedureName=self.random_string(
+                ['颅脑平扫', '胸部平扫', '肺部增强', '颈部增强', '上腹部平扫', '双手平扫', '膝关节平扫']),
+            requestDate=self.random_date_time('time'),
+            organizationCode='QWYHZYFZX',
+            organizationName='全网云杭州研发中心'
+        )
+        medical_dict['accessionNumber'] = medical_dict['serviceSectID'] + self.multi_type_number('custom', **dict(
+            mask='########'))
+        medical_dict['placerOrderDetailNO'] = medical_dict['placerOrderDetailNO'] + '-1'
+        return medical_dict
 
 
 fake_data = FakeData()
@@ -125,3 +184,4 @@ if __name__ == "__main__":
     # tk.html2img(ht, r'./static/report/out.jpg')
 
     print(fake_data.person_info())
+    print(fake_data.identify_code('19990214'))

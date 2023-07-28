@@ -116,6 +116,86 @@ class ValidateToken(BaseModel):
     status: int = 1
 
 
+"""DEP"""
+
+
+# 电子申请单列表
+class ElectronicInfo(BaseModel):
+    medrecNo: str
+    patientID: Optional[str]
+    outPatientNO: Optional[str]  # 门诊类型有
+    invoceNO: str
+    cardSelfNO: str
+    healthCardNO: Optional[str]
+    name: str
+    birthDate: str
+    sex: str  # M 、F
+    addressDetail: Optional[str]
+    contactPhoneNO: Optional[str]
+    age: int
+    ageUnit: str
+    idCard: str
+    nation: str
+    nationality: str
+    maritalStatus: str
+    isPregnant: int = 0  # 0 1
+    adverseReaction: Optional[str] # 不良反映
+    insuranceType: str
+    insuranceID: str
+    medicalRecord: Optional[str]
+    clinicDiagnosis: str
+    symptom: str
+    requestAttention: Optional[str]
+    reasonforStudy: Optional[str]
+    requestMemo: str=''
+    charges: float  # 50~165.0
+    chargeFlag: str = "1"
+    requestDeptName: str
+    providerName: str
+    patientClass: str  # 1000 2000
+    serviceSectID: str
+    procedureCode: str  # 13866
+    procedureName: str
+    requestDate: str  # 最近一个月
+    providerPhone: Optional[str]
+    filmPrint: Optional[str]
+    filmCount: int = 0
+    placerOrderNO: str
+    placerOrderDetailNO: str
+    orderPatientID: str=''
+    orderUID: str=''
+    invisitTimes: int = 0
+    visitUID: Optional[str]
+    filmChargedCount: int = 0
+    privacyLevel: int = 0
+    patientType: Optional[str]
+    hospitalStaffFlag: Optional[str]
+    multiDrugFastFlag: Optional[str]
+    isolationLevel: Optional[str]
+    fallScore: Optional[str]
+    painScore: Optional[str]
+    transportationMode: Optional[str]
+    emergencygrading: Optional[str]
+    inPatientNO: Optional[str]
+    ward: Optional[str]
+    sickRoom: Optional[str]
+    bedNO: Optional[str]
+    inHospitalFlag: Optional[str]
+    physicalNO: Optional[str]
+    diseaseDiagnosisCode: Optional[str]
+    diseaseDiagnosisName: Optional[str]
+
+
+class ElectronicList(BaseModel):
+    isSuccess: bool = True
+    resultDesc: str = "获得成功"
+    resultJson: list[ElectronicInfo]
+    currentPage: int
+    pageSize: int
+    totalRecords: int
+    token: str = None
+
+
 if __name__ == "__main__":
     # st = StudyData(**dict(workQueueGuid='1' patientId='32156' patientName='张颜值'))
     # print(st.model_dump())

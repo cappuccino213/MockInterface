@@ -7,6 +7,7 @@
 import uvicorn
 from fastapi import FastAPI
 
+from routers.dep_router import dep_route
 from routers.token_router import token_route, product_route
 from routers.archive_router import archive_route
 from routers.follow_up_router import follow_up_route
@@ -22,6 +23,7 @@ app.include_router(follow_up_route)
 app.include_router(imcis_route)
 app.include_router(token_route)
 app.include_router(product_route)
+app.include_router(dep_route)
 
 if __name__ == "__main__":
     # uvicorn.run(app='main:app', host='0.0.0.0', port=8888, reload=True)
