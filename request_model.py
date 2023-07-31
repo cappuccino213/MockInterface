@@ -74,7 +74,7 @@ class RequestElectronic(BaseModel):
     EndTime: Optional[str]
     Ward: Optional[str]
     ObservationLocation: Optional[str]
-    ChargeFlag: 0
+    ChargeFlag: int = 0
     FilterRegistered: bool = False
     PatientName: Optional[str]
     SearchType: Optional[str]  # 1-门诊  2-住院  4-体检 7-全部

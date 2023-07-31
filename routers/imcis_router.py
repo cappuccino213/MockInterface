@@ -19,7 +19,7 @@ imcis_route = APIRouter(tags=["IMCIS"])
 
 
 def fake_report_info():
-    business_time = fake_data.random_date_time('time')
+    business_time = fake_data.random_time() # ToDo  需要重新写函数
     pi = fake_data.person_info()
     report_info_dict = dict(patientID=fake_data.multi_type_number('custom', **dict(mask='pid######')),
                             name=pi['name'],

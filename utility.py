@@ -6,6 +6,8 @@
 """
 import datetime
 import base64
+import random
+
 import imgkit
 
 from dateutil.relativedelta import relativedelta
@@ -47,15 +49,42 @@ class FakeData:
     def random_string(self, enum_str: list[str]):
         return self.m_random.choice_enum_item(enum_str)
 
+    # 根据时间范围生成日期
+    @staticmethod
+    def random_time(start_time: str, end_time: str):
+        """
+        :param start_time: 2023-07-31
+        :param end_time:
+        :return:
+        """
+        # 把字符串时间转化成时间格式
+        start = datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+        end = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
+        # 计算出时间范围
+        time_range = (end - start).days
+        # 随机天数
+        random_day = random.randint(0,time_range*365)
+
+        print(time_range)
+        return "这里要算一下"
+        # https://blog.csdn.net/weixin_44679038/article/details/128067554
+
+
+
+        # 随机生成时间
+        pass
+
     # 随机生成时间
 
-    def random_date_time(self, date_type, start=CONFIG['mockup']['year']['start'], end=CONFIG['mockup']['year']['end']):
+    def random_date(self, start: int = CONFIG['mockup']['year']['start'],
+                    end: int = CONFIG['mockup']['year']['end']):
         # start = CONFIG['mockup']['year']['start']
         # end = CONFIG['mockup']['year']['end']
-        if date_type == 'date':
-            return self.dt.date(start=start, end=end).strftime("%Y-%m-%d")
-        if date_type == 'time':
-            return self.dt.datetime(start=start, end=end).strftime("%Y-%m-%d %H:%M:%S.%f")
+        return self.dt.date(start=start, end=end).strftime("%Y-%m-%d")
+        # if date_type == 'date':
+        #     return self.dt.date(start=start, end=end).strftime("%Y-%m-%d")
+        # if date_type == 'time':
+        #     return self.dt.datetime(start=start, end=end).strftime("%Y-%m-%d %H:%M:%S")  # 用法有误
 
     def identify_code(self, birth):
         """
@@ -103,20 +132,20 @@ class FakeData:
             clinicDiagnosis='临床诊断的测试文本内容',  # 临床诊断,
             symptom='患者症状的描述',  # 症状
             charges=88.0,  # 费用
-            requestDepName='申请科室名称',  # 申请科室
+            requestDeptName='申请科室名称',  # 申请科室
             # providerName='',  # 申请医生名
             patientClass=self.random_string(['1000', '2000', '3000', '4000']),
             serviceSectID=self.random_string(['CR', 'DR', 'CT', 'RF', 'XA', 'MR', 'MG']),
             procedureCode='0' + self.random_string([str(i) for i in range(1001, 2000)]),
             procedureName=self.random_string(
                 ['颅脑平扫', '胸部平扫', '肺部增强', '颈部增强', '上腹部平扫', '双手平扫', '膝关节平扫']),
-            requestDate=self.random_date_time('time'),
+            # requestDate=self.random_date_time('time'),
             organizationCode='QWYHZYFZX',
             organizationName='全网云杭州研发中心'
         )
         medical_dict['accessionNumber'] = medical_dict['serviceSectID'] + self.multi_type_number('custom', **dict(
             mask='########'))
-        medical_dict['placerOrderDetailNO'] = medical_dict['placerOrderDetailNO'] + '-1'
+        medical_dict['placerOrderDetailNO'] = medical_dict['placerOrderNO'] + '-1'
         return medical_dict
 
 
@@ -183,5 +212,6 @@ if __name__ == "__main__":
     #
     # tk.html2img(ht, r'./static/report/out.jpg')
 
-    print(fake_data.person_info())
-    print(fake_data.identify_code('19990214'))
+    # print(fake_data.person_info())
+    # print(fake_data.identify_code('19990214'))
+    fake_data.random_time('2023-07-21 14:00:00','2023-07-31 13:22:54')

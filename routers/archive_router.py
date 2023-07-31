@@ -29,7 +29,7 @@ def get_compare_failed_study():
                                            patientBirthday=fake_data.person_info()['birth'],
                                            patientSex='Male' if fake_data.person_info()['sex'] == '男性' else 'Female',
                                            modality=fake_data.random_string(['CR', 'DR', 'CT', 'RF', 'XA', 'MR', 'MG']),
-                                           studyDateTime=fake_data.random_date_time('time'),
+                                           studyDateTime=fake_data.random_date(),
                                            accessionNumber=fake_data.multi_type_number('custom',
                                                                                        **dict(mask='#######')),
                                            studyInstanceUID=str(fake_data.multi_type_number('dicom')),
