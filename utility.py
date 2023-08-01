@@ -10,6 +10,8 @@ import random
 
 import imgkit
 
+from typing import Union
+
 from dateutil.relativedelta import relativedelta
 from mimesis import Person
 from mimesis.random import Random
@@ -36,7 +38,7 @@ class FakeData:
 
     # 号码生成
 
-    def multi_type_number(self, num_type, **params):
+    def multi_type_number(self, num_type, **params) -> str:
         if num_type == 'uuid':
             return Cryptographic().uuid()
         if num_type == 'custom':  # 自定义号码
@@ -49,32 +51,29 @@ class FakeData:
     def random_string(self, enum_str: list[str]):
         return self.m_random.choice_enum_item(enum_str)
 
-    # 根据时间范围生成日期
+    # 根据时间范围随机生成时间
     @staticmethod
-    def random_time(start_time: str, end_time: str):
+    def random_time(start_time: Union[str, datetime.datetime], end_time: Union[str, datetime.datetime]):
         """
-        :param start_time: 2023-07-31
-        :param end_time:
-        :return:
+        :param start_time: 2023-07-01 00：00：30
+        :param end_time:2023-07-31 12：01：30
+        :return:介于start和end之间的时间 datetime类型
         """
-        # 把字符串时间转化成时间格式
-        start = datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
-        end = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
+        if type(start_time) == str:
+            # 把字符串时间转化成时间格式
+            start_time = datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+            end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
         # 计算出时间范围
-        time_range = (end - start).days
+        time_range = (end_time - start_time).days
         # 随机天数
-        random_day = random.randint(0,time_range*365)
+        random_day = random.randint(1, time_range)
+        random_time = start_time + datetime.timedelta(days=random_day)
+        # print(random_time.strftime("%Y-%m-%d %H:%M:%S"))
+        # return random_time.strftime("%Y-%m-%d %H:%M:%S")
+        return random_time
+        # 参考https://blog.csdn.net/weixin_44679038/article/details/128067554
 
-        print(time_range)
-        return "这里要算一下"
-        # https://blog.csdn.net/weixin_44679038/article/details/128067554
-
-
-
-        # 随机生成时间
-        pass
-
-    # 随机生成时间
+    # 随机生成日期
 
     def random_date(self, start: int = CONFIG['mockup']['year']['start'],
                     end: int = CONFIG['mockup']['year']['end']):
@@ -126,7 +125,7 @@ class FakeData:
             # accessionNumber='',  # 检查编号
             invoiceNO='',  # 发票号
             cardSelfNO='',  # 卡号
-            placerOrderNO=self.multi_type_number('custom', **dict(mask='pon######')),  # 申请单号
+            placerOrderNO=self.multi_type_number('custom', **dict(mask='plo######')),  # 申请单号
             insuranceID=self.multi_type_number('custom', **dict(mask='YB########')),  # 医保号
             insuranceType=self.random_string(['医保', '农保']),  # 医保类型
             clinicDiagnosis='临床诊断的测试文本内容',  # 临床诊断,
@@ -213,5 +212,9 @@ if __name__ == "__main__":
     # tk.html2img(ht, r'./static/report/out.jpg')
 
     # print(fake_data.person_info())
+    # print(fake_data.medical_info()['placerOrderNO'])
     # print(fake_data.identify_code('19990214'))
-    fake_data.random_time('2023-07-21 14:00:00','2023-07-31 13:22:54')
+    # fake_data.random_time('2023-07-21 14:00:00', '2023-07-31 13:22:54')
+    fd = fake_data.person_info()
+    for _ in range(10):
+        print(fd)

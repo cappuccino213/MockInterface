@@ -19,7 +19,8 @@ imcis_route = APIRouter(tags=["IMCIS"])
 
 
 def fake_report_info():
-    business_time = fake_data.random_time() # ToDo  需要重新写函数
+    now = datetime.datetime.today()
+    business_time = fake_data.random_time(now - datetime.timedelta(days=30), now)  # 取近一个月的时间
     pi = fake_data.person_info()
     report_info_dict = dict(patientID=fake_data.multi_type_number('custom', **dict(mask='pid######')),
                             name=pi['name'],
@@ -34,8 +35,8 @@ def fake_report_info():
                             phoneNumber=pi['phone'],
                             examDate=business_time,
                             examUID=fake_data.multi_type_number('uuid'),
-                            auditDate=business_time,
-                            preliminaryDate=business_time,
+                            auditDate=business_time + datetime.timedelta(hours=2),  # 检查后2小时审核
+                            preliminaryDate=business_time + datetime.timedelta(hours=1),  # 检查后1小时报告
                             medRecNO=fake_data.multi_type_number('custom', **dict(mask='mec######')),
                             inPatientNO=fake_data.multi_type_number('custom', **dict(mask='IN######')))
     # 根据生成的出生日期计算年龄

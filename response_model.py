@@ -157,12 +157,12 @@ class ElectronicInfo(BaseModel):
     serviceSectID: str
     procedureCode: str  # 13866
     procedureName: str
-    requestDate: str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")  # 默认当天
+    requestDate: Optional[str] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # 默认当天
     providerPhone: Optional[str] = None
     filmPrint: Optional[str] = None
     filmCount: int = 0
-    placerOrderNO: str
-    placerOrderDetailNO: str
+    placerOrderNO: Optional[str]
+    placerOrderDetailNO: Optional[str]
     orderPatientID: str = ''
     orderUID: str = ''
     invisitTimes: int = 0
@@ -190,7 +190,7 @@ class ElectronicInfo(BaseModel):
 class ElectronicList(BaseModel):
     isSuccess: bool = True
     resultDesc: str = "获得成功"
-    resultJson: Optional[list[ElectronicInfo]]=None
+    resultJson: Optional[list[ElectronicInfo]] = None
     currentPage: int
     pageSize: int
     totalRecords: int

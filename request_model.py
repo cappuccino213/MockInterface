@@ -63,7 +63,7 @@ class ProductRegister(BaseModel):
 
 
 class RequestElectronic(BaseModel):
-    PlacerOrderNO: Optional[str]
+    PlacerOrderNO: Optional[str] = None
     SystemCode: str = 'RIS'
     OrganizationHISCode: str = 'QWYHZYFZX'
     OrganizationName: str = '全网云杭州研发中心'
