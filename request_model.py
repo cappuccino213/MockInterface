@@ -49,8 +49,14 @@ class RequestReport(BaseModel):
 
 class RequestToken(BaseModel):
     ProductName: str
-    HospitalCode: str
+    HospitalCode: Optional[str]
     RequestIP: str
+
+
+class RequestOld(BaseModel):
+    audience: Optional[str]
+    CustomData: Optional[str]
+    Expire: Optional[int]
 
 
 # 产品注册

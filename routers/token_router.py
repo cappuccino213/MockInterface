@@ -6,8 +6,9 @@
 """
 import jwt
 from fastapi import APIRouter
+from fastapi.responses import RedirectResponse
 
-from request_model import RequestToken
+from request_model import RequestToken, RequestOld
 from response_model import Token, ValidateToken, CheckStatus, RegisterInfo
 
 """token服务模拟"""
@@ -47,13 +48,26 @@ def check_product_register(hospitalCode: str, productName: str):
 
 
 @token_route.post('/RetriveInternal', name="获取令牌", response_model=Token)
-def retrieve_token(request_token: RequestToken):
+def retrieve_internal_token(request_token: RequestToken):
     token_body = dict(token=jwt_token(request_token.model_dump()), desc="success", status=0)
     return Token(**token_body)
 
 
 @token_route.post('/ValidateInternal', name="验证令牌", response_model=ValidateToken)
-def validate_token(request_token: RequestToken):
+def validate_internal_token(request_token: RequestToken):
+    validate_result = dict(desc="成功", status=0)
+    return ValidateToken(**validate_result)
+
+
+# 兼容老版本token接口
+@token_route.post('/Retrive', name="获取令牌（老版本）", response_model=Token)
+def retrieve_token(request_token: RequestOld):
+    token_body = dict(token=jwt_token(request_token.model_dump()), desc="success", status=0)
+    return Token(**token_body)
+
+
+@token_route.post('/Validate', name="验证令牌(老版本)", response_model=ValidateToken)
+def validate_token():
     validate_result = dict(desc="成功", status=0)
     return ValidateToken(**validate_result)
 

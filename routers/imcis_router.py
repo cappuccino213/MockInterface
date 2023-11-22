@@ -33,10 +33,10 @@ def fake_report_info():
                             serviceSectID=fake_data.random_string(['CR', 'DR', 'CT', 'RF', 'XA', 'MR', 'MG']),
                             organizationID='全网云',
                             phoneNumber=pi['phone'],
-                            examDate=business_time,
+                            examDate=business_time.strftime("%Y-%m-%d %H:%M:%S"),
                             examUID=fake_data.multi_type_number('uuid'),
-                            auditDate=business_time + datetime.timedelta(hours=2),  # 检查后2小时审核
-                            preliminaryDate=business_time + datetime.timedelta(hours=1),  # 检查后1小时报告
+                            auditDate=(business_time + datetime.timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S"),  # 检查后2小时审核
+                            preliminaryDate=(business_time + datetime.timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S"),  # 检查后1小时报告
                             medRecNO=fake_data.multi_type_number('custom', **dict(mask='mec######')),
                             inPatientNO=fake_data.multi_type_number('custom', **dict(mask='IN######')))
     # 根据生成的出生日期计算年龄
