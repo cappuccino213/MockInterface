@@ -50,7 +50,7 @@ class RequestReport(BaseModel):
 class RequestToken(BaseModel):
     ProductName: str
     HospitalCode: Optional[str]
-    RequestIP: str
+    RequestIP: Optional[str] = None  # None表示可以不提供该参数
 
 
 class RequestOld(BaseModel):

@@ -19,7 +19,7 @@ from mimesis import Cryptographic
 from mimesis.locales import Locale
 from mimesis import Datetime
 
-from pydicom.uid import generate_uid
+# from pydicom.uid import generate_uid
 
 from config import CONFIG
 
@@ -33,8 +33,13 @@ class FakeData:
         self.dt = Datetime(Locale.ZH)
         self.m_random = Random()  # 随机对象
         self.tel_phone_header = ['182', '138', '139', '159', '189', '158']
+        self.dicom_uid_prefix = "1.2.410.200010.1073359.3636.68918.69638.141818."
 
-    # 通用方法
+    # dicomuid生成
+    def dicom_uid(self, length=5) -> str:
+        random_int = random.randint(10 ** (length - 1), 10 ** length - 1)  # 生成一个指定长度的随机整数
+        random_string = str(random_int).zfill(length)
+        return self.dicom_uid_prefix + random_string
 
     # 号码生成
 
@@ -44,7 +49,8 @@ class FakeData:
         if num_type == 'custom':  # 自定义号码
             return self.m_random.custom_code(**params)
         if num_type == 'dicom':
-            return generate_uid()
+            # return generate_uid()
+            return self.dicom_uid()
 
     # 随机生成字符串
 
@@ -215,6 +221,9 @@ if __name__ == "__main__":
     # print(fake_data.medical_info()['placerOrderNO'])
     # print(fake_data.identify_code('19990214'))
     # fake_data.random_time('2023-07-21 14:00:00', '2023-07-31 13:22:54')
-    fd = fake_data.person_info()
-    for _ in range(10):
-        print(fd)
+    # fd = fake_data.person_info()
+    #
+    # for _ in range(10):
+    #     print(fd)
+
+    print(FakeData().dicom_uid())
