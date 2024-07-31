@@ -19,7 +19,6 @@ from mimesis import Cryptographic
 from mimesis.locales import Locale
 from mimesis import Datetime
 
-# from pydicom.uid import generate_uid
 
 from config import CONFIG
 

@@ -4,7 +4,6 @@
 @Author: 九层风（YePing Zhang）
 @Contact : yeahcheung213@163.com
 """
-import time
 
 from fastapi import APIRouter
 from request_model import FollowUpInfo
