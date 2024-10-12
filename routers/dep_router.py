@@ -8,8 +8,8 @@ import datetime
 
 from fastapi import APIRouter
 
-from request_model import RequestElectronic
-from response_model import ElectronicList, ElectronicInfo
+from request_model import RequestElectronic, NotifyToHISJsonRequest
+from response_model import ElectronicList, ElectronicInfo, NotifyToHIS
 from utility import fake_data
 from config import CONFIG
 
@@ -74,6 +74,13 @@ def get_electronic_list(request_electronic: RequestElectronic):
     else:
         return ElectronicList(
             **dict(resultDesc="未查询到数据", currentPage=0, pageSize=0, totalRecords=0))
+
+
+@dep_route.post('/api/Notify/NotifyHIS', name="通知HIS接口", response_model=NotifyToHIS)
+def notify_to_his(request_notify_his: NotifyToHISJsonRequest):
+    if request_notify_his.PlacerOrderNO:
+        return NotifyToHIS(**dict(isSuccess=True, ResultDesc="通知HIS成功"))
+    return NotifyToHIS(**dict(isSuccess=False, ResultDesc="通知HIS失败,申请单号未空"))
 
 
 if __name__ == "__main__":

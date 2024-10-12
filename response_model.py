@@ -197,6 +197,12 @@ class ElectronicList(BaseModel):
     token: str = None
 
 
+class NotifyToHIS(BaseModel):
+    isSuccess: bool = True
+    ResultDesc: str = "通知成功"
+    ResultJson: dict = None
+
+
 if __name__ == "__main__":
     # st = StudyData(**dict(workQueueGuid='1' patientId='32156' patientName='张颜值'))
     # print(st.model_dump())

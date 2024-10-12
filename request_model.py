@@ -86,5 +86,9 @@ class RequestElectronic(BaseModel):
     SearchType: Optional[str]  # 1-门诊  2-住院  4-体检 7-全部
 
 
+class NotifyToHISJsonRequest(BaseModel):
+    PlacerOrderNO: str
+
+
 if __name__ == "__main__":
     pass
