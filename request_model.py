@@ -69,21 +69,22 @@ class ProductRegister(BaseModel):
 
 
 class RequestElectronic(BaseModel):
-    PlacerOrderNO: Optional[str] = None
+    PlacerOrderNO: Optional[str] = None  # 申请单号
     SystemCode: str = 'RIS'
     OrganizationHISCode: str = 'QWYHZYFZX'
     OrganizationName: str = '全网云杭州研发中心'
-    ServiceSectID: Optional[str] = 'CR|MG|MR|DR|CT|XA|TJ|RF|XB'
-    PatientClass: Optional[str] = '0'
-    MedrecNo: Optional[str]
-    StartTime: Optional[str]
-    EndTime: Optional[str]
+    ServiceSectID: str = 'CR|MG|MR|DR|CT|XA|TJ|RF|XB'
+    PatientClass: Optional[str] = None  # 申请单列表获取，就诊类别：1000-门诊 2000-住院 3000-急诊 4000-体检 5000-VIP
+    MedrecNo: Optional[str] = None  # 病历号
+    StartTime: Optional[str] = None
+    EndTime: Optional[str] = None
     Ward: Optional[str]
     ObservationLocation: Optional[str]
     ChargeFlag: int = 0
     FilterRegistered: bool = False
     PatientName: Optional[str]
-    SearchType: Optional[str]  # 1-门诊  2-住院  4-体检 7-全部
+    SearchType: Optional[str] = None  # 输入号码获取，在RIS的输入框切换对应查询库，其中1-门诊  2-住院  4-体检 7-全部
+    CardSelfNO: Optional[str] = None  # 就诊卡号
 
 
 class NotifyToHISJsonRequest(BaseModel):
