@@ -4,9 +4,9 @@
 @Author: 九层风（YePing Zhang）
 @Contact : yeahcheung213@163.com
 """
-from typing import Optional
+from typing import Optional, List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 """使用Pydantic来构造请求体模型"""
 
@@ -35,8 +35,8 @@ class RequestReport(BaseModel):
     TypeCode: str = 'ExamResult'
     ClassCode: Optional[str] = ''
     BusinessType: Optional[str] = ''
-    ServiceSectID: Optional[list] = []
-    ResultStatusCode: list = ['3080', '4030']
+    ServiceSectID: Optional[list] = Field(default_factory=list)
+    ResultStatusCode: list = Field(['3080', '4030'])
     DelayMin: Optional[str] = ''
     ExamLocation: Optional[str] = ''
     SearchType: int = 0
@@ -52,11 +52,30 @@ class RequestToken(BaseModel):
     HospitalCode: Optional[str]
     RequestIP: Optional[str] = None  # None表示可以不提供该参数
 
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "ProductName": "eWordRIS",
+                "HospitalCode": "QWYHZYFZX",
+                "RequestIP": "127.0.0.1"
+            }
+        }
+
 
 class RequestOld(BaseModel):
+    RequestIP: str
     audience: Optional[str]
     CustomData: Optional[str]
     Expire: Optional[int]
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "RequestIP": "127.0.0.1",
+                "audience": "eWordRIS",
+                "CustomData": "",
+                "Expire": 2}
+        }
 
 
 # 产品注册
@@ -89,6 +108,39 @@ class RequestElectronic(BaseModel):
 
 class NotifyToHISJsonRequest(BaseModel):
     PlacerOrderNO: str
+
+
+"""Archive"""
+
+
+class RequestImportOrders(BaseModel):
+    AccessionNumber: str
+    PatientID: str
+    PatientName: str
+    PatientSex: str
+    PatientBirthDate: str
+    PatientType: int
+    OrganizationCode: str
+    FormType: int
+    FileData: List[str]
+
+
+class RequestGetStudyApplyImage(BaseModel):
+    AccessionNumber: str
+    PatientID: str
+    OrganizationCode: str
+    FormType: int
+
+
+"""HttpProxy"""
+
+
+class APIRequestProxy(BaseModel):
+    api_path: str
+    method: str
+    body: dict = Field(default={})
+    headers: dict = Field(default={'Content-Type': 'application/json'})
+    params: dict = Field(default={})
 
 
 if __name__ == "__main__":
