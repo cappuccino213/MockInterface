@@ -7,7 +7,7 @@
 import datetime
 import random
 import time
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Any
 
 from pydantic import BaseModel
 
@@ -37,6 +37,27 @@ class CompareFailList(BaseModel):
     code: int
     data: List[StudyData]
     message: str
+
+
+class ImportOrderResponse(BaseModel):
+    code: int
+    message: str
+
+
+class ImageData(BaseModel):
+    imageData: str
+    imageName: str
+
+
+class ImageInfo(BaseModel):
+    formType: int
+    imageResult: list[ImageData]
+
+
+class GetStudyApplyImageResponse(BaseModel):
+    Data: list[ImageInfo]
+    Code: int
+    Message: str
 
 
 """FollowUp"""
@@ -108,12 +129,12 @@ class CheckStatus(BaseModel):
 
 class Token(BaseModel):
     token: str
-    desc: str = None
+    desc: Union[str, Any] = None
     status: int = 1
 
 
 class ValidateToken(BaseModel):
-    desc: str = None
+    desc: Union[str, Any] = None
     status: int = 1
 
 
