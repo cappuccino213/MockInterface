@@ -9,8 +9,8 @@ process_num = 4 # 进程数
 # 模拟数据参数
 [mockup]
 # 数据年份范围
-year.start = 2022
-year.end = 2023
+year.start = 2023
+year.end = 2024
 
 # 年龄范围
 age.start = 0
@@ -26,3 +26,9 @@ response.count = 20 # 总数
 response.size = 20 # 页面大小
 response.page = 1 # 当前页
 
+# 代理参数
+# 反向代理到真实的服务器（比如需要真实token或者难以mock的又需要真实逻辑的接口）
+[proxy]
+token_host = "http://192.168.1.18:8709"
+
+archive_host = "http://192.168.1.18:8188"
