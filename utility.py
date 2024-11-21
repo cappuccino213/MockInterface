@@ -10,6 +10,8 @@ import random
 
 import imgkit
 
+import requests
+
 from typing import Union
 
 from dateutil.relativedelta import relativedelta
@@ -19,8 +21,8 @@ from mimesis import Cryptographic
 from mimesis.locales import Locale
 from mimesis import Datetime
 
-
 from config import CONFIG
+from request_model import APIRequestProxy
 
 """工具模块"""
 
@@ -200,6 +202,28 @@ class ToolKit:
 
 tk = ToolKit()
 
+
+# 代理请求
+class HttpProxy:
+    def __init__(self, proxy_url):
+        self.proxy_url = proxy_url
+
+    def get_proxy(self, proxy_params: APIRequestProxy):
+        # 拼接完整接口地址
+        api_url = self.proxy_url + proxy_params.api_path
+
+        # 根据请求方法，选择对应的请求方法
+        http_method = proxy_params.method.lower()
+        if http_method == 'get':
+            response = requests.get(api_url, params=proxy_params.params)
+        elif http_method == 'post':
+            p_headers = proxy_params.headers
+            response = requests.post(api_url, headers=p_headers, json=proxy_params.body)
+        else:
+            raise ValueError("不支持的请求方法")
+        return response.json()
+
+
 if __name__ == "__main__":
     pass
     test_dict = dict(organizationID="全网云研发中心",
@@ -225,4 +249,4 @@ if __name__ == "__main__":
     # for _ in range(10):
     #     print(fd)
 
-    print(FakeData().dicom_uid())
+    print(FakeData().medical_info())
