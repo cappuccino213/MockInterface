@@ -4,19 +4,30 @@
 @Author: 九层风（YePing Zhang）
 @Contact : yeahcheung213@163.com
 """
-from fastapi import APIRouter
+
+from fastapi import APIRouter, Header, Depends, HTTPException, Body
+
+from request_model import RequestImportOrders, RequestGetStudyApplyImage
 from response_model import CompareFailList, StudyData
 from utility import *
 
+from typing import Optional
+
 """接口定义"""
-# Archive
-# archive_route = APIRouter(prefix="/mock/archive", tags=['archive'])
 archive_route = APIRouter(tags=['Archive'])
-# fake_data = FakeData()
+
+real_archive_host = CONFIG['proxy']['archive_host']
+
+
+# 定义一个依赖项来从Authorization请求头中提取token
+async def get_token_from_header(authorization: Optional[str] = Header(None)):
+    if authorization is None:
+        raise HTTPException(status_code=401, detail="Authorization header missing")
+    return authorization
 
 
 @archive_route.post('/Exchange/GetCompareFailedStudy', name="获取QA阻塞列表", response_model=CompareFailList)
-def get_compare_failed_study():
+async def get_compare_failed_study():
     # 未加入参校验和接口逻辑
     # 返回结果生成
     study_list = []
@@ -40,6 +51,36 @@ def get_compare_failed_study():
     compare_failed_list = CompareFailList(
         **dict(code=1, data=study_list, message="Success"))
     return compare_failed_list
+
+
+"""以下是转接真实存档路由"""
+
+
+@archive_route.post('/Exchange/ImportOrders', name="上传检查申请单", description=f"实际访问地址 {real_archive_host}")
+async def import_orders(request_body: RequestImportOrders = Body(...), token=Depends(get_token_from_header)):
+    """
+    :param request_body: Body表示请求体
+    :param token: Header表示请求头
+    :return:
+    """
+    real_api = f"{real_archive_host}/Exchange/ImportOrders"
+    headers = {"Authorization": token, "Content-Type": "application/json"}
+    response = requests.post(real_api, json=request_body.model_dump(), headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    print(f"warning:{response.status_code, response.text}")
+
+
+@archive_route.post('/Exchange/GetStudyApplyImage', name="获取检查申请单",
+                    description=f"实际访问地址 {real_archive_host}")
+async def get_study_apply_image(request_body: RequestGetStudyApplyImage = Body(...),
+                                token=Depends(get_token_from_header)):
+    real_api = f"{real_archive_host}/Exchange/GetStudyApplyImage"
+    headers = {"Authorization": token, "Content-Type": "application/json"}
+    response = requests.post(real_api, json=request_body.model_dump(), headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    print(f"warning:{response.status_code, response.text}")
 
 
 if __name__ == "__main__":
