@@ -20,44 +20,6 @@ dep_route = APIRouter(tags=['DEP'])
 
 @dep_route.post('/api/Electronic/ElectronicList', name="获取电子申请单", response_model=ElectronicList)
 def get_electronic_list(request_electronic: RequestElectronic):
-    # def get_electronic_info():
-    #     result_dict = dict(
-    #         medrecNo=fake_data.medical_info()['medrecNo'],
-    #         invoceNO=fake_data.medical_info()['invoiceNO'],
-    #         cardSelfNO=fake_data.medical_info()['cardSelfNO'],
-    #         patientID=fake_data.medical_info()['patientID'],
-    #         name=fake_data.person_info()['name'],
-    #         birthDate=fake_data.person_info()['birth'],
-    #         sex='M' if fake_data.person_info()['sex'] == '男性' else 'F',
-    #         # 'Male' if fake_data.person_info()['sex'] == '男性' else 'Female'
-    #         age=fake_data.person_info()['age'],
-    #         ageUnit=fake_data.person_info()['ageUnit'],
-    #         idCard=fake_data.person_info()['ID'],
-    #         nation=fake_data.person_info()['nation'],
-    #         nationality=fake_data.person_info()['nationality'],
-    #         maritalStatus=fake_data.person_info()['maritalStatus'],
-    #         # isPregnant = fake_data.person_info()['isPregnant'],
-    #         insuranceType=fake_data.medical_info()['insuranceType'],
-    #         insuranceID=fake_data.medical_info()['insuranceID'],
-    #         clinicDiagnosis=fake_data.medical_info()['clinicDiagnosis'],
-    #         symptom=fake_data.medical_info()['symptom'],
-    #         charges=fake_data.medical_info()['charges'],
-    #         requestDeptName=fake_data.medical_info()['requestDeptName'],
-    #         providerName=fake_data.person_info()['name'],
-    #         patientClass=fake_data.medical_info()['patientClass'],
-    #         serviceSectID=fake_data.medical_info()['serviceSectID'],
-    #         procedureCode=fake_data.medical_info()['procedureCode'],
-    #         procedureName=fake_data.medical_info()['procedureName'],
-    #         placerOrderNO=fake_data.medical_info()['placerOrderNO'],
-    #         placerOrderDetailNO=fake_data.medical_info()['placerOrderDetailNO'],
-    #         requestDate=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S"')
-    #     )
-    #     return result_dict
-
-    # 优化get_electronic_info函数
-    # 定义日期格式
-
-    # --先生成完整模拟数据--
     def get_electronic_info():
         medical_info = fake_data.medical_info()
         person_info = fake_data.person_info()
@@ -82,7 +44,8 @@ def get_electronic_list(request_electronic: RequestElectronic):
             'symptom': medical_info['symptom'],
             'charges': medical_info['charges'],
             'requestDeptName': medical_info['requestDeptName'],
-            'providerName': person_info['name'],
+            # 'providerName': person_info['name'],
+            'providerName': "申请医生",
             'patientClass': medical_info['patientClass'],
             'serviceSectID': medical_info['serviceSectID'],
             'procedureCode': medical_info['procedureCode'],
