@@ -113,8 +113,8 @@ class FakeData:
                            phone=self.m_random.choice_enum_item(self.tel_phone_header) + self.person.phone_number(
                                '########'),
                            occupation=self.person.occupation(),
-                           nation='中华人民共和国',
-                           nationality='汉族',
+                           nation='汉族',
+                           nationality='中华人民共和国',
                            maritalStatus=self.random_string(['已婚', '未婚']))
         person_dict['birth'] = (datetime.datetime.now().date() - relativedelta(years=person_dict['age'])).strftime(
             "%Y-%m-%d")
@@ -185,7 +185,7 @@ class ToolKit:
         )
         # return html_string
 
-    # 读取图片转化成直接流
+    # 读取图片转化成Base64流
     @staticmethod
     def read_image(image_path=r'./static/ECG1.jpg'):
         with open(image_path, 'rb') as f:
@@ -236,17 +236,4 @@ if __name__ == "__main__":
                      age=28,
                      requestDept="骨科",
                      auditDate="2023-7-8 12:45:12")
-    # ht = tk.fill_html(test_dict)
-    #
-    # tk.html2img(ht, r'./static/report/out.jpg')
-
-    # print(fake_data.person_info())
-    # print(fake_data.medical_info()['placerOrderNO'])
-    # print(fake_data.identify_code('19990214'))
-    # fake_data.random_time('2023-07-21 14:00:00', '2023-07-31 13:22:54')
-    # fd = fake_data.person_info()
-    #
-    # for _ in range(10):
-    #     print(fd)
-
     print(FakeData().medical_info())
