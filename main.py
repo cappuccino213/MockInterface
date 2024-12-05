@@ -12,6 +12,7 @@ from routers.token_router import token_route, product_route
 from routers.archive_router import archive_route
 from routers.follow_up_router import follow_up_route
 from routers.imcis_router import imcis_route
+from routers.exam_recognition_router import recognition_route
 
 from multiprocessing import freeze_support
 
@@ -26,6 +27,8 @@ app.include_router(imcis_route)
 app.include_router(token_route)
 app.include_router(product_route)
 app.include_router(dep_route)
+
+app.include_router(recognition_route)
 
 if __name__ == "__main__":
     # uvicorn.run(app='main:app', host='0.0.0.0', port=8888, reload=True)

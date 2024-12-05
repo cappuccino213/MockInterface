@@ -32,3 +32,22 @@ response.page = 1 # 当前页
 token_host = "http://192.168.1.18:8709"
 
 archive_host = "http://192.168.1.18:8188"
+#archive_host = "http://192.168.1.59:7032"
+
+
+[business]
+# 验证机构代码
+recognition.org_code = "91330106MADJ7PWR93"
+# 签名密钥
+recognition.sign = "eWord@TomTaw@HZ"
+
+# 检查互认测试数据
+recognition.patient_name = "张三"
+recognition.id_card = "330109199001010001"
+recognition.organization_code = "91330106MADJ7PWR93"
+recognition.doctor_name = "策士"
+recognition.doctor_code = "001"
+
+recognition.gender = "男"
+recognition.exam_uid = "202411261111"
+recognition.area = "杭州"

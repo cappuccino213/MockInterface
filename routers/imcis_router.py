@@ -4,7 +4,6 @@
 @Author: 九层风（YePing Zhang）
 @Contact : yeahcheung213@163.com
 """
-import datetime
 from typing import List
 
 from fastapi import APIRouter
@@ -39,9 +38,6 @@ def fake_report_info():
                             preliminaryDate=(business_time + datetime.timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S"),  # 检查后1小时报告
                             medRecNO=fake_data.multi_type_number('custom', **dict(mask='mec######')),
                             inPatientNO=fake_data.multi_type_number('custom', **dict(mask='IN######')))
-    # 根据生成的出生日期计算年龄
-    # report_info_dict['age'] = relativedelta(datetime.datetime.today(),
-    #                                         datetime.datetime.strptime(report_info_dict['birthDate'], "%Y-%m-%d")).years
     return report_info_dict
 
 
