@@ -6,7 +6,7 @@
 """
 from typing import Optional, List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, constr
 
 """使用Pydantic来构造请求体模型"""
 
@@ -45,6 +45,13 @@ class RequestReport(BaseModel):
 
 
 """Token"""
+
+
+# 注册信息
+# class RegisterAndValidate(BaseModel):
+#     ProductName: str
+#     HospitalCode: str
+#     RequestIP: Optional[str] = None
 
 
 class RequestToken(BaseModel):
@@ -141,6 +148,50 @@ class APIRequestProxy(BaseModel):
     body: dict = Field(default={})
     headers: dict = Field(default={'Content-Type': 'application/json'})
     params: dict = Field(default={})
+
+
+"""检查互认"""
+
+
+# 请求头
+class RequestHeader(BaseModel):
+    clientId: str  # 客户端ID
+    orgCode: str  # 机构编码
+    timestamp: str  # 时间戳
+    sign: str  # 签名
+
+
+class RequestGetRelativeReports(BaseModel):
+    # patientName: constr(min_length=2)
+    patientName: str
+    idCardNo: str
+    organizationCode: str
+    doctorName: str
+    doctorCode: str
+    department: Optional[str]
+
+
+class RequestGetDetails(BaseModel):
+    patientName: str
+    idCardNo: str
+    organizationCode: str
+    doctorName: str
+    examUid: str
+    area: str
+
+
+class RequestGetDenyReasons(BaseModel):
+    organizationCode: str
+
+
+class RequestUploadRecognizedResult(BaseModel):
+    isRecognized: bool
+    organizationCode: str
+    doctorName: str
+    examUid: Optional[str]
+    area: Optional[str]
+    reasonCode: Optional[str]
+    reasonMark: Optional[str]
 
 
 if __name__ == "__main__":

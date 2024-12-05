@@ -9,7 +9,7 @@ import random
 import time
 from typing import List, Optional, Union, Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 """返回结果的数据模型"""
 
@@ -117,7 +117,7 @@ class RegisterInfo(BaseModel):
     count: int
     productName: str
     version: str
-    hospitalName: str
+    hospitalName: Optional[str] = Field(default='全网云杭州研发中心', description='医院名称')
 
 
 # 校验产品注册
