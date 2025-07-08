@@ -118,6 +118,31 @@ class NotifyToHISJsonRequest(BaseModel):
 
 
 """Archive"""
+class MatchedDataModel(BaseModel):
+    """匹配数据模型"""
+    PatientId: Optional[str] = None
+    PatientName: Optional[str] = None
+    OtherNames: Optional[str] = None
+    PatientAge: Optional[str] = None
+    Birthday: Optional[str] = None
+    PatientSex: Optional[str] = None
+    Modality: Optional[str] = None
+    AccessionNumber: Optional[str] = None
+    PatientClass: Optional[str] = None
+
+class RequestDoManualMatch(BaseModel):
+    """手工比对"""
+    WorkQueueGuid: str
+    MatchedData: MatchedDataModel
+
+class RequestFailedStudy(BaseModel):
+    AccessionNumber: Optional[str]=None
+    PatientID: Optional[str]=None
+    OrganizationCode: Optional[str]=None
+    StudyBeginDate: Optional[str]=None
+    StudyEndDate: Optional[str]=None
+    ExamType: Optional[str]=None
+    PatientName: Optional[str]=None
 
 
 class RequestImportOrders(BaseModel):
