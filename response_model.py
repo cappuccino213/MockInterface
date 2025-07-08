@@ -14,7 +14,14 @@ from pydantic import BaseModel, Field
 """返回结果的数据模型"""
 
 """Archive"""
+class QASuccessResponse(BaseModel):
+    code: int = 0
+    message: str = "Success"
 
+
+class QAFailResponse(BaseModel):
+    code: int
+    message: str = "Fail"
 
 class StudyData(BaseModel):
     workQueueGuid: str
@@ -31,7 +38,6 @@ class StudyData(BaseModel):
     studyDescription: str
     organizationCode: str
     errorDescription: str
-
 
 class CompareFailList(BaseModel):
     code: int
