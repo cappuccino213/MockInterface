@@ -4,7 +4,6 @@
 @Author: 九层风（YePing Zhang）
 @Contact : yeahcheung213@163.com
 """
-import json
 from typing import Union, Optional
 
 import jwt
@@ -12,7 +11,7 @@ import requests
 from fastapi import APIRouter, Body, HTTPException, Header, Depends
 
 from config import CONFIG
-from request_model import RequestToken, RequestOld, ProductRegister
+from request_model import RequestToken, RequestOld
 from response_model import Token, ValidateToken, CheckStatus, RegisterInfo
 
 """token服务模拟"""
