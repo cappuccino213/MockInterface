@@ -12,10 +12,16 @@ import imgkit
 
 import requests
 
+import string
+
 from typing import Union
 
+from datetime import datetime, timedelta
+import random
+
+from dateutil.parser.isoparser import isoparse
 from dateutil.relativedelta import relativedelta
-from mimesis import Person
+from mimesis import Person,Numeric, Text
 from mimesis.random import Random
 from mimesis import Cryptographic
 from mimesis.locales import Locale
@@ -33,6 +39,7 @@ class FakeData:
         self.person = Person(Locale.ZH)
         self.dt = Datetime(Locale.ZH)
         self.m_random = Random()  # 随机对象
+        self.numeric = Numeric()
         self.tel_phone_header = ['182', '138', '139', '159', '189', '158']
         self.dicom_uid_prefix = "1.2.410.200010.1073359.3636.68918.69638.141818."
 
@@ -42,16 +49,39 @@ class FakeData:
         random_string = str(random_int).zfill(length)
         return self.dicom_uid_prefix + random_string
 
-    # 号码生成
 
-    def multi_type_number(self, num_type, **params) -> str:
+
+    # 自定义号码
+    @staticmethod
+    def custom_code(mask: str = '######') -> str:
+        """
+        根据掩码规则生成字符串，支持 '#' 表示数字，其他字符保留
+        :param mask: 掩码规则，例如 'FS#####', '#######'
+        :return: 根据掩码生成的字符串
+        """
+        result = ''
+        numeric = Numeric()
+        text = Text()
+
+        for ch in mask:
+            if ch == '#':
+                result += str(numeric.integer_number(1, 9))  # 生成一位随机数字
+            elif ch == '*':
+                result += random.choices(string.ascii_letters + string.digits, k=1)[0]   # 生成一位字母或数字
+            else:
+                result += ch
+        return result
+
+    def multi_type_number(self, num_type, **params):
         if num_type == 'uuid':
             return Cryptographic().uuid()
-        if num_type == 'custom':  # 自定义号码
-            return self.m_random.custom_code(**params)
-        if num_type == 'dicom':
-            # return generate_uid()
+        elif num_type == 'custom':  # 自定义号码
+            mask = params.get('mask', '######')
+            return self.custom_code(mask)
+        elif num_type == 'dicom':
             return self.dicom_uid()
+        else:
+            raise ValueError(f"Unsupported number type: {num_type}")
 
     # 随机生成字符串
 
@@ -60,7 +90,7 @@ class FakeData:
 
     # 根据时间范围随机生成时间
     @staticmethod
-    def random_time(start_time: Union[str, datetime.datetime], end_time: Union[str, datetime.datetime]):
+    def random_time(start_time: Union[str, datetime], end_time: Union[str, datetime]):
         """
         :param start_time: 2023-07-01 00：00：30
         :param end_time:2023-07-31 12：01：30
@@ -68,8 +98,8 @@ class FakeData:
         """
         if type(start_time) == str:
             # 把字符串时间转化成时间格式
-            start_time = datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
-            end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
+            start_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+            end_time = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
         # 计算出时间范围
         time_range = (end_time - start_time).days
         # 随机天数
@@ -84,13 +114,50 @@ class FakeData:
 
     def random_date(self, start: int = CONFIG['mockup']['year']['start'],
                     end: int = CONFIG['mockup']['year']['end']):
-        # start = CONFIG['mockup']['year']['start']
-        # end = CONFIG['mockup']['year']['end']
+        """
+        :param start: 开始年份
+        :param end: 结束年份
+        :return: 随机生成指定年份的日期
+        """
         return self.dt.date(start=start, end=end).strftime("%Y-%m-%d")
-        # if date_type == 'date':
-        #     return self.dt.date(start=start, end=end).strftime("%Y-%m-%d")
-        # if date_type == 'time':
-        #     return self.dt.datetime(start=start, end=end).strftime("%Y-%m-%d %H:%M:%S")  # 用法有误
+
+    # 日期区间生成日期
+
+    @staticmethod
+    def random_date_in_range(start_date_str: Union[str, datetime],
+                             end_date_str: Union[str, datetime],
+                             date_format: str = "%Y-%m-%d") -> str:
+        """
+        在指定日期范围内生成一个随机日期字符串
+        :param start_date_str: 起始日期（字符串或 datetime）
+        :param end_date_str: 结束日期（字符串或 datetime）
+        :param date_format: 输出格式
+        :return: 格式化后的日期字符串
+        """
+        def parse_date(date_val: Union[str, datetime]) -> datetime.date:
+            if isinstance(date_val, datetime):
+                return date_val.date()
+            try:
+                # 尝试按格式解析
+                return datetime.strptime(date_val, date_format).date()
+            except ValueError:
+                # 尝试自动识别 ISO 等格式
+                return isoparse(date_val).date()
+
+        start_date = parse_date(start_date_str)
+        end_date = parse_date(end_date_str)
+
+        # 计算两个日期之间的总天数
+        delta_days = (end_date - start_date).days
+
+        if delta_days < 0:
+            raise ValueError("结束日期不能早于起始日期")
+
+        # 随机选择一天
+        random_days = random.randint(0, delta_days)
+        random_date = start_date + timedelta(days=random_days)
+
+        return random_date.strftime(date_format)
 
     def identify_code(self, birth):
         """
@@ -108,7 +175,7 @@ class FakeData:
     def person_info(self):
         person_dict = dict(name=self.person.full_name(reverse=True).replace(' ', ''),
                            sex=self.person.sex(),
-                           age=self.person.age(CONFIG['mockup']['age']['start'], CONFIG['mockup']['age']['end']),
+                           age=self.numeric.integer_number(CONFIG['mockup']['age']['start'], CONFIG['mockup']['age']['end']),
                            ageUnit='岁',
                            phone=self.m_random.choice_enum_item(self.tel_phone_header) + self.person.phone_number(
                                '########'),
@@ -116,7 +183,7 @@ class FakeData:
                            nation='汉族',
                            nationality='中华人民共和国',
                            maritalStatus=self.random_string(['已婚', '未婚']))
-        person_dict['birth'] = (datetime.datetime.now().date() - relativedelta(years=person_dict['age'])).strftime(
+        person_dict['birth'] = (datetime.now().date() - relativedelta(years=person_dict['age'])).strftime(
             "%Y-%m-%d")
         person_dict['ID'] = self.identify_code(person_dict['birth'].replace('-', ''))
 
@@ -224,16 +291,36 @@ class HttpProxy:
         return response.json()
 
 
+
+
+# 令牌处理类
+class TokenHandle:
+    TOKEN_HOST = CONFIG['token_server']['token_host']
+
+    # AUTH_INFO = CONFIG['archive']['auth_product_info']
+    # 获取令牌
+    def get_token_value(self, auth_info):
+       request_body = auth_info
+       header = {"content-type": "application/json"}
+       api_path = "/Token/RetriveInternal"
+       res_result = requests.post(url=self.TOKEN_HOST+api_path, json=request_body, headers=header)
+       if res_result.status_code != 200:
+           raise Exception(res_result.status_code)
+       return res_result.json()
+
+
 if __name__ == "__main__":
-    pass
-    test_dict = dict(organizationID="全网云研发中心",
-                     serviceSectID="CT",
-                     serviceSect="腹部平扫",
-                     sex="男性",
-                     patientID="88888",
-                     accessionNumber="666666",
-                     name="患者甲",
-                     age=28,
-                     requestDept="骨科",
-                     auditDate="2023-7-8 12:45:12")
-    print(FakeData().medical_info())
+    # test_dict = dict(organizationID="全网云研发中心",
+    #                  serviceSectID="CT",
+    #                  serviceSect="腹部平扫",
+    #                  sex="男性",
+    #                  patientID="88888",
+    #                  accessionNumber="666666",
+    #                  name="患者甲",
+    #                  age=28,
+    #                  requestDept="骨科",
+    #                  auditDate="2023-7-8 12:45:12")
+    # print(FakeData().medical_info())
+
+    test_auth = CONFIG['archive']['auth_product_info']
+    print(TokenHandle().get_token_value(test_auth))
