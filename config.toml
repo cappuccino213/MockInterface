@@ -4,7 +4,7 @@
 [uvicorn]
 port = 8888
 reload = true # 是否重载
-process_num = 4 # 进程数
+process_num = 1 # 进程数
 
 # 模拟数据参数
 [mockup]
@@ -51,3 +51,20 @@ recognition.doctor_code = "001"
 recognition.gender = "男"
 recognition.exam_uid = "202411261111"
 recognition.area = "杭州"
+
+[archive]
+archive_host = "http://192.168.1.18:8188"
+auth_product_info.ProductName ="eWordArchive"
+auth_product_info.HospitalCode ="QWYHZYFZX"
+auth_product_info.RequestIP ="192.168.1.56"
+
+# 可以填写实际存档中存在的影像uid，再配合RIS的view浏览地址配置成UID
+# 可实现mock手工匹配后可直接访问的效果
+mock_studyinstanceuid = "1.2.840.113619.186.24014628713172.20210609101015387.123"
+
+[ris]
+# 手工匹配通知RIS需要的参数
+ris_port = 8141
+
+[token_server]
+token_host = "http://192.168.1.18:8709"
