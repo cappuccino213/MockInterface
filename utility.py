@@ -104,7 +104,7 @@ class FakeData:
         time_range = (end_time - start_time).days
         # 随机天数
         random_day = random.randint(1, time_range)
-        random_time = start_time + datetime.timedelta(days=random_day)
+        random_time = start_time + timedelta(days=random_day)
         # print(random_time.strftime("%Y-%m-%d %H:%M:%S"))
         # return random_time.strftime("%Y-%m-%d %H:%M:%S")
         return random_time
@@ -202,8 +202,10 @@ class FakeData:
             placerOrderNO=self.multi_type_number('custom', **dict(mask='plo######')),  # 申请单号
             insuranceID=self.multi_type_number('custom', **dict(mask='YB########')),  # 医保号
             insuranceType=self.random_string(['医保', '农保']),  # 医保类型
-            clinicDiagnosis='临床诊断的测试文本内容',  # 临床诊断,
-            symptom='患者症状的描述',  # 症状
+            # clinicDiagnosis='临床诊断的测试文本内容',  # 临床诊断,
+            clinicDiagnosis='',  # 临床诊断,
+            symptom='',  # 症状
+            # symptom='患者症状的描述',  # 症状
             charges=88.0,  # 费用
             requestDeptName='申请科室名称',  # 申请科室
             # providerName='',  # 申请医生名
