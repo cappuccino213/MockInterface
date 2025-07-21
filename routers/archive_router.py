@@ -102,10 +102,13 @@ def fake_compare_failed_list(request_body: RequestFailedStudy) -> StudyData:
 
 
 # 获取archive的token
-def get_archive_token():
-    auth_info = CONFIG['archive']['auth_product_info']
+def get_internal_token():
+    auth_info = CONFIG['ris']['auth_product_info'] # 这里需要用被调用方的产品信息
     result = TokenHandle().get_token_value(auth_info)
-    return result.get('token').split(" ")[1]
+    print(f"INFO:     获取{CONFIG['ris']['auth_product_info']}的token信息：{result}")
+    # return result.get('token').split(" ")[1]
+    # 需要完整的token，所以不截取
+    return result.get('token')
 
 # 定义一个通知RIS归档完成的方法
 def notify_ris_archive_complete(ris_url:str, request_body: dict):
@@ -129,13 +132,12 @@ def notify_ris_archive_complete(ris_url:str, request_body: dict):
     "data": null}
     """
     api_path = "/api/Archive/Finish"
-    token_value = get_archive_token()
+    token_value = get_internal_token()
     full_url = f"{ris_url}{api_path}"
     res = requests.post(url=full_url, json=request_body, headers={"Content-Type": "application/json", "Authorization": token_value})
-    # print(f"{full_url} 返回的状态码为:{res.status_code}")
     if res.status_code != 200:
-        print(f"WARNING: RIS归档完成通知失败，返回信息:{res.text}")
-    print(f"INFO: RIS归档完成通知结果:{res.json()}")
+        print(f"WARNING:     RIS归档完成通知失败，返回信息:{res.text}")
+    print(f"INFO:     RIS归档完成通知结果:{res.json()}")
     return res.json()
 
 
@@ -152,7 +154,7 @@ def do_manual_match(request:Request,request_body: RequestDoManualMatch = Body(..
     client_port = CONFIG['ris']['ris_port']
     # 拼接完整地址
     client_url = f"http://{client_host}:{client_port}"
-    print(f"INFO: 手工匹配的请求方地址为:{client_url}")
+    print(f"INFO:     手工匹配的请求方地址为:{client_url}")
     # 模拟的study_uid,若未获取到使用默认值
     mock_study_uid = CONFIG.get('archive').get('mock_studyinstanceuid',"1.2.194.0.108707908.20240730075934.1413.16898.1234567")
 
