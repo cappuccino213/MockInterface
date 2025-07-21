@@ -173,15 +173,21 @@ async def retrieve_interactive_token(request_token: RequestToken):
     return Token(**token_body)
 
 
+# 产品间验证
 @token_route.post('/ValidateInteractive', name="产品间验证令牌", response_model=ValidateToken)
 async def validate_interactive_token(request_token: RequestToken = Body(...), token=Depends(get_token_from_header)):
     path_url = "/Token/ValidateInteractive"
     headers = {"Authorization": token}
-    result = check_register(path_url, request_token.model_dump(), "POST", headers)
-    if result:
-        return ValidateToken(**result)
+    try:
+        result = check_register(path_url, request_token.model_dump(), "POST", headers)
+        if result:
+            return ValidateToken(**result)
+    except Exception as e:
+        print(f"ERROR: {e}")
+
     validate_result = dict(desc="成功", status=0)
     return ValidateToken(**validate_result)
+
 
 
 if __name__ == "__main__":
