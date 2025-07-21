@@ -31,6 +31,7 @@ def get_electronic_list(request_electronic: RequestElectronic):
             'patientID': medical_info['patientID'],
             'name': person_info['name'],
             'birthDate': person_info['birth'],
+            # 'birthDate': "",
             'sex': 'M' if person_info['sex'] == '男性' else 'F',
             'age': person_info['age'],
             'ageUnit': person_info['ageUnit'],
