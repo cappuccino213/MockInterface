@@ -1,5 +1,5 @@
 # 使用官方Python基础镜像（slim），减少镜像体积
-FROM python:3.9-slim
+FROM python:3.13-slim
 # 设置作者信息
 LABEL authors="zhangyp"
 
