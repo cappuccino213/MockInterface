@@ -58,12 +58,14 @@ auth_product_info.ProductName ="eWordArchive"
 auth_product_info.HospitalCode ="QWYHZYFZX"
 auth_product_info.RequestIP ="192.168.1.110"
 
-# 可以填写实际存档中存在的影像uid，再配合RIS的view浏览地址配置成UID
+# 可以填写实际存档中存在的影像uid，再配合RIS的view浏览地址配置成只用atudyinstanceUID访问的方式
 # 可实现mock手工匹配后可直接访问的效果
 mock_studyinstanceuid = "1.2.840.113619.186.24014628713172.20210609101015387.123"
 
 [ris]
 # 手工匹配通知RIS需要的参数
+# 模拟阻塞列表需要将存档的地址改成mock地址
+ris_url = "http://192.168.1.18"
 ris_port = 8141
 auth_product_info.ProductName ="eWordRIS"
 auth_product_info.HospitalCode ="QWYHZYFZX"
