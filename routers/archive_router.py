@@ -18,6 +18,10 @@ archive_route = APIRouter(tags=['Archive'])
 
 real_archive_host = CONFIG['proxy']['archive_host']
 
+archive_config = CONFIG['archive']
+
+ris_config = CONFIG['ris']
+
 
 # 定义一个依赖项来从Authorization请求头中提取token
 async def get_token_from_header(authorization: Optional[str] = Header(None)):
@@ -26,36 +30,6 @@ async def get_token_from_header(authorization: Optional[str] = Header(None)):
     return authorization
 
 
-# @archive_route.post('/Exchange/GetCompareFailedStudy_bak', name="获取QA阻塞列表", response_model=CompareFailList)
-# async def get_compare_failed_study_bak():
-#     # 未加入参校验和接口逻辑
-#     # 返回结果生成
-#     study_list = []
-#     for _ in range(20):  # 返回的条目
-#         study_list.append(StudyData(**dict(workQueueGuid=fake_data.multi_type_number('uuid'),
-#                                            patientId=fake_data.multi_type_number('custom', **dict(mask='FS#####')),
-#                                            otherName='',
-#                                            patientName=fake_data.person_info()['name'],
-#                                            patientAge=str(fake_data.person_info()['age']) + 'y',
-#                                            patientBirthday=fake_data.person_info()['birth'],
-#                                            patientSex='Male' if fake_data.person_info()['sex'] == '男性' else 'Female',
-#                                            modality=fake_data.random_string(['CR', 'DR', 'CT', 'RF', 'XA', 'MR', 'MG']),
-#                                            studyDateTime=fake_data.random_date(),
-#                                            accessionNumber=fake_data.multi_type_number('custom',
-#                                                                                        **dict(mask='#######')),
-#                                            studyInstanceUID=str(fake_data.multi_type_number('dicom')),
-#                                            studyDescription='',
-#                                            organizationCode='QWYHZYFZX',
-#                                            errorDescription='获取0条待比对检查信息'
-#                                            )))
-#     compare_failed_list = CompareFailList(
-#         **dict(code=1, data=study_list, message="Success"))
-#     return compare_failed_list
-
-
-
-# QA阻塞列表增加入参的条件逻辑
-# 根据条件逻辑mock阻塞列表数据
 def fake_compare_failed_list(request_body: RequestFailedStudy) -> StudyData:
     """根据请求参数构造一个模拟的 StudyData 对象"""
 
@@ -68,7 +42,7 @@ def fake_compare_failed_list(request_body: RequestFailedStudy) -> StudyData:
 
     # 基础字段映射规则：如果存在则取用户输入，否则 mock
     base_fields = {
-        'organizationCode': lambda: request_body.OrganizationCode or 'QWYHZYFZX',
+        'organizationCode': lambda: request_body.OrganizationCode or archive_config.get("auth_product_info").get("HospitalCode"),
         'accessionNumber': lambda: request_body.AccessionNumber or fake_data.multi_type_number('custom', mask='#######'),
         'patientId': lambda: request_body.PatientID or fake_data.multi_type_number('custom', mask='FS#####'),
         'patientName': lambda: request_body.PatientName or fake_data.person_info()['name'],
@@ -148,12 +122,11 @@ def do_manual_match(request:Request,request_body: RequestDoManualMatch = Body(..
     这里的请求方必须是真实的RIS服务，不能用接口工具测试，因为以下回通过请求获取地址，如果不在请求方的机器上使用接口测试，
     会导致获取的client_host，造成通知QA错误
     """
-    # 借助Request从请求方获取请求方地址信息
-    client_host = request.client.host
+    client_host = ris_config.get('ris_url')
     # 配置从获取RIS服务端口信息
-    client_port = CONFIG['ris']['ris_port']
+    client_port = ris_config.get('ris_port')
     # 拼接完整地址
-    client_url = f"http://{client_host}:{client_port}"
+    client_url = f"{client_host}:{client_port}"
     print(f"INFO:     手工匹配的请求方地址为:{client_url}")
     # 模拟的study_uid,若未获取到使用默认值
     mock_study_uid = CONFIG.get('archive').get('mock_studyinstanceuid',"1.2.194.0.108707908.20240730075934.1413.16898.1234567")
@@ -164,9 +137,9 @@ def do_manual_match(request:Request,request_body: RequestDoManualMatch = Body(..
         "AccessionNumber": request_body.MatchedData.AccessionNumber,
         "PatientID": request_body.MatchedData.PatientId,
         "MedrecNo": "",
-        "OrganizationCode": "QWYHZYFZX",
+        "OrganizationCode": archive_config.get("auth_product_info").get("HospitalCode"),
         "AETitle": "mock_ae",
-        "OrganizationGuid": "3a0e58e2-da00-4a7a-bbdc-58a4bb3aaa81",
+        # "OrganizationGuid": "3a0e58e2-da00-4a7a-bbdc-58a4bb3aaa81",
         "ObservationDate": datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     }
     # 先通知RIS归档完成
