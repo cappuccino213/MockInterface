@@ -43,7 +43,7 @@ def jwt_token(token_dict, secret=SECRET, algorithms="HS256"):
     :param algorithms: 签名算法
     :return: token的字符串
     """
-    token_value = "Bearer " + jwt.encode(token_dict, secret, algorithms)
+    token_value = "Bearer " + jwt.api_jwt.encode(token_dict, secret, algorithms)
     return token_value
 
 
