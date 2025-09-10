@@ -5,7 +5,6 @@
 @Contact : yeahcheung213@163.com
 """
 import os
-from typing import Any
 
 import toml
 
@@ -33,7 +32,7 @@ class ConfigManager:
                 toml_data = toml.load(f)
             self._config = toml_data
         except FileNotFoundError:
-            print(f"Error Config file '{self.file_path}' not found.")
+            print(f"Error Config file {self.file_path} not found.")
         except Exception as e:
             print(f"Error loading or parsing config: {e}")
 

@@ -170,6 +170,7 @@ class ElectronicInfo(BaseModel):
     adverseReaction: Optional[str] = None  # 不良反映
     insuranceType: str
     insuranceID: str
+    inHospitalFlag: str
     medicalRecord: Optional[str] = None
     clinicDiagnosis: str
     symptom: str

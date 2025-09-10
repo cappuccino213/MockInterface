@@ -41,6 +41,7 @@ def get_electronic_list(request_electronic: RequestElectronic):
             'maritalStatus': person_info['maritalStatus'],
             'insuranceType': medical_info['insuranceType'],
             'insuranceID': medical_info['insuranceID'],
+            'inHospitalFlag':'1',
             'clinicDiagnosis': medical_info['clinicDiagnosis'],
             'symptom': medical_info['symptom'],
             'charges': medical_info['charges'],
@@ -94,6 +95,7 @@ def get_electronic_list(request_electronic: RequestElectronic):
 
     # -电子申请单列表获取-
     # 电子申请单列表，根据日期生成
+    """全随机数据生成代码
     if request_electronic.StartTime and request_electronic.EndTime:
         ele_list = []
         for _ in range(CONFIG['mockup']['response']['count']):
@@ -112,7 +114,94 @@ def get_electronic_list(request_electronic: RequestElectronic):
             ele_list.append(ElectronicInfo(**result_dict))
         # ele_list = [ElectronicInfo(**result_dict) for _ in range(CONFIG['mockup']['response']['count'])]
         return ElectronicList(**dict(resultJson=ele_list), currentPage=1, pageSize=1, totalRecords=1)
+    """
+    """包含两条相同病人，不同检查项目的数据（合并电子单登记使用）"""
+    # 替换原有的电子申请单列表生成代码
+    if request_electronic.StartTime and request_electronic.EndTime:
+        count = CONFIG['mockup']['response']['count']
+        ele_list = []
+        base_template = None
+        first_record = None
 
+        for i in range(count):
+            # 生成基础模板数据
+            if i == 0:
+                result_dict = get_electronic_info()
+                first_record = result_dict.copy()  # 保存第一条完整记录
+                # 保存基础模板（去除需要变化的字段）
+                base_template = {
+                    k: v for k, v in result_dict.items()
+                    if k not in ['procedureCode', 'procedureName', 'placerOrderNO', 'placerOrderDetailNO']
+                }
+
+                # 应用筛选条件
+                if request_electronic.PatientClass != '0':
+                    result_dict['patientClass'] = request_electronic.PatientClass
+                if request_electronic.ServiceSectID:
+                    result_dict['serviceSectID'] = request_electronic.ServiceSectID
+
+                result_dict['requestDate'] = fake_data.random_time(
+                    request_electronic.StartTime,
+                    request_electronic.EndTime
+                ).strftime("%Y-%m-%d %H:%M:%S")
+                ele_list.append(ElectronicInfo(**result_dict))
+
+            # 生成重复数据（基于模板）
+            elif i == 1 and base_template:
+                # 使用基础模板创建新数据
+                duplicate_data = base_template.copy()
+
+                # 获取与基础数据不同的检查项目
+                medical_info = fake_data.medical_info()
+                # 确保新的检查项目名称与基础数据不同
+                retry_count = 0
+                max_retries = 20
+                while (medical_info['procedureName'] == first_record['procedureName'] or
+                       medical_info['procedureCode'] == first_record['procedureCode']) and \
+                        retry_count < max_retries:
+                    medical_info = fake_data.medical_info()
+                    retry_count += 1
+
+                duplicate_data.update({
+                    'procedureCode': medical_info['procedureCode'],
+                    'procedureName': medical_info['procedureName'],
+                    'placerOrderNO': medical_info['placerOrderNO'],
+                    'placerOrderDetailNO': medical_info['placerOrderNO'] + '-1'
+                })
+
+                # 应用筛选条件
+                if request_electronic.PatientClass != '0':
+                    duplicate_data['patientClass'] = request_electronic.PatientClass
+                if request_electronic.ServiceSectID:
+                    duplicate_data['serviceSectID'] = request_electronic.ServiceSectID
+
+                duplicate_data['requestDate'] = fake_data.random_time(
+                    request_electronic.StartTime,
+                    request_electronic.EndTime
+                ).strftime("%Y-%m-%d %H:%M:%S")
+                ele_list.append(ElectronicInfo(**duplicate_data))
+
+            # 生成其他随机数据
+            else:
+                result_dict = get_electronic_info()
+
+                # 应用筛选条件
+                if request_electronic.PatientClass != '0':
+                    result_dict['patientClass'] = request_electronic.PatientClass
+                if request_electronic.ServiceSectID:
+                    result_dict['serviceSectID'] = request_electronic.ServiceSectID
+
+                result_dict['requestDate'] = fake_data.random_time(
+                    request_electronic.StartTime,
+                    request_electronic.EndTime
+                ).strftime("%Y-%m-%d %H:%M:%S")
+                ele_list.append(ElectronicInfo(**result_dict))
+
+        return ElectronicList(**dict(resultJson=ele_list), currentPage=1, pageSize=len(ele_list),
+                              totalRecords=len(ele_list))
+
+    """----------"""
+    # -无结果-
     return ElectronicList(
         **dict(resultDesc="未查询到数据", currentPage=0, pageSize=0, totalRecords=0))
 

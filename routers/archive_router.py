@@ -188,4 +188,5 @@ async def get_study_apply_image(request_body: RequestGetStudyApplyImage = Body(.
 
 
 if __name__ == "__main__":
-    pass
+    print(f"TEST 存档配置信息:{archive_config}")
+    print(f"TEST:{CONFIG['ris']['auth_product_info']}")
