@@ -154,7 +154,8 @@ def do_manual_match(request:Request,request_body: RequestDoManualMatch = Body(..
 @archive_route.post('/Exchange/GetCompareFailedStudy', name="获取QA阻塞列表", response_model=CompareFailList)
 async def get_compare_failed_study(request_body: RequestFailedStudy = Body(...)):
     """增加根据入参返回数据的逻辑"""
-    study_list = [fake_compare_failed_list(request_body) for _ in range(20)] # 返回的20条
+    result_count = archive_config.get("response_count",20) # 从配置文件中获取返回结果数量，默认20
+    study_list = [fake_compare_failed_list(request_body) for _ in range(result_count)]
     return CompareFailList(code=1, data=study_list, message="Success")
 
 

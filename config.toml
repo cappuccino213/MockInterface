@@ -8,6 +8,14 @@ process_num = 1 # 进程数
 
 # 模拟数据参数
 [mockup]
+# 数据地域设置
+# locale = "EN" # 英语环境
+ locale = "ZH" # 中文环境
+# locale = "JA" # 日语环境
+# locale = "KO" # 韩语环境
+# locale = "RU" # 俄语环境
+
+
 # 数据年份范围
 year.start = 2024
 year.end = 2025
@@ -22,7 +30,7 @@ areacode = ['330109', '330110', '330122', '330127', '330182', '330183', '330185'
              '330302', '330303', '330304', '330322', '330324', '330326', '330327', '330328', '330329', '330381',]
 
 # 返回页面设置，如有
-response.count = 20 # 总数
+response.count = 100 # 总数
 response.size = 20 # 页面大小
 response.page = 1 # 当前页
 
@@ -61,6 +69,9 @@ auth_product_info.RequestIP ="192.168.1.110"
 # 可以填写实际存档中存在的影像uid，再配合RIS的view浏览地址配置成只用atudyinstanceUID访问的方式
 # 可实现mock手工匹配后可直接访问的效果
 mock_studyinstanceuid = "1.2.840.113619.186.24014628713172.20210609101015387.123"
+
+# 返回条数，目前200
+response_count = 200
 
 [ris]
 # 手工匹配通知RIS需要的参数

@@ -6,7 +6,6 @@
 """
 import datetime
 import base64
-import random
 
 import imgkit
 
@@ -36,8 +35,11 @@ from request_model import APIRequestProxy
 # mock数据
 class FakeData:
     def __init__(self):
-        self.person = Person(Locale.ZH)
-        self.dt = Datetime(Locale.ZH)
+        # 从配置读取地域设置
+        locale_str = CONFIG.get('mockup').get('locale','ZH') # 默认中文
+        locale = Locale[locale_str]
+        self.person = Person(locale)
+        self.dt = Datetime(Locale.ZH) # 时间对象暂时不变，看后续需求
         self.m_random = Random()  # 随机对象
         self.numeric = Numeric()
         self.tel_phone_header = ['182', '138', '139', '159', '189', '158']
@@ -324,5 +326,6 @@ if __name__ == "__main__":
     #                  auditDate="2023-7-8 12:45:12")
     # print(FakeData().medical_info())
 
-    test_auth = CONFIG['archive']['auth_product_info']
-    print(TokenHandle().get_token_value(test_auth))
+    # test_auth = CONFIG['archive']['auth_product_info']
+    # print(TokenHandle().get_token_value(test_auth))
+    print(Locale['EN'])
