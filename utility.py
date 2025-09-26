@@ -45,6 +45,22 @@ class FakeData:
         self.tel_phone_header = ['182', '138', '139', '159', '189', '158']
         self.dicom_uid_prefix = "1.2.410.200010.1073359.3636.68918.69638.141818."
 
+
+        # 身份证相关信息预定义
+        self.marital_status_list = ['已婚', '未婚']
+        self.nation_list = ['汉族']
+        self.nationality_list = ['中华人民共和国']
+        self.areacode_list = CONFIG['mockup']['areacode']
+        self.sequence_code_list = [str(code) for code in range(100, 300)]
+        self.check_code_list = [str(i) for i in range(10)] + ['X']
+
+        # 预定义常用列表，避免在每次调用medical_info时重复创建
+        self.patient_class_list = ['1000', '2000', '3000', '4000']
+        self.service_sect_list = ['CR', 'DR', 'CT', 'RF', 'XA', 'MR', 'MG']
+        self.procedure_name_list = ['颅脑平扫', '胸部平扫', '肺部增强', '颈部增强', '上腹部平扫', '双手平扫',
+                                    '膝关节平扫']
+        self.procedure_code_list = ['0' + str(i) for i in range(1001, 2000)]
+
     # dicomuid生成
     def dicom_uid(self, length=5) -> str:
         random_int = random.randint(10 ** (length - 1), 10 ** length - 1)  # 生成一个指定长度的随机整数
@@ -55,7 +71,7 @@ class FakeData:
 
     # 自定义号码
     @staticmethod
-    def custom_code(mask: str = '######') -> str:
+    def custom_code_bak(mask: str = '######') -> str:
         """
         根据掩码规则生成字符串，支持 '#' 表示数字，其他字符保留
         :param mask: 掩码规则，例如 'FS#####', '#######'
@@ -73,6 +89,21 @@ class FakeData:
             else:
                 result += ch
         return result
+
+    def custom_code(self, mask: str = '######') -> str:
+        """
+        优化的自定义号码生成方法
+        """
+        # 预分配结果字符串的长度
+        result = []
+        for ch in mask:
+            if ch == '#':
+                result.append(str(self.numeric.integer_number(1, 9)))
+            elif ch == '*':
+                result.append(random.choices(string.ascii_letters + string.digits, k=1)[0])
+            else:
+                result.append(ch)
+        return ''.join(result)
 
     def multi_type_number(self, num_type, **params):
         if num_type == 'uuid':
@@ -161,7 +192,7 @@ class FakeData:
 
         return random_date.strftime(date_format)
 
-    def identify_code(self, birth):
+    def identify_code_bak(self, birth):
         """
         :param birth: 出生日期8位,格式为20000214
         :return: 18位身份证号
@@ -173,8 +204,18 @@ class FakeData:
         check_code = self.random_string([str(i) for i in range(9)] + ['X'])
         return areacode + birth + sequence_code + check_code
 
+    def identify_code(self, birth):
+        """
+        :param birth: 出生日期8位,格式为20000214
+        :return: 18位身份证号
+        """
+        areacode = self.m_random.choice_enum_item(self.areacode_list)
+        sequence_code = self.m_random.choice_enum_item(self.sequence_code_list)
+        check_code = self.m_random.choice_enum_item(self.check_code_list)
+        return areacode + birth + sequence_code + check_code
+
     # 具体业务数据
-    def person_info(self):
+    def person_info_bak(self):
         person_dict = dict(name=self.person.full_name(reverse=True).replace(' ', ''),
                            sex=self.person.sex(),
                            age=self.numeric.integer_number(CONFIG['mockup']['age']['start'], CONFIG['mockup']['age']['end']),
@@ -191,8 +232,38 @@ class FakeData:
 
         return person_dict
 
+    def person_info(self):
+        # 预生成基本信息
+        full_name = self.person.full_name(reverse=True).replace(' ', '')
+        sex = self.person.sex()
+        age = self.numeric.integer_number(CONFIG['mockup']['age']['start'], CONFIG['mockup']['age']['end'])
+
+        person_dict = {
+            'name': full_name,
+            'sex': sex,
+            'age': age,
+            'ageUnit': '岁',
+            'phone': self.m_random.choice_enum_item(self.tel_phone_header) + self.person.phone_number('########'),
+            'occupation': self.person.occupation(),
+            'nation': self.m_random.choice_enum_item(self.nation_list),
+            'nationality': self.m_random.choice_enum_item(self.nationality_list),
+            'maritalStatus': self.m_random.choice_enum_item(self.marital_status_list)
+        }
+
+        # 优化日期计算，使用更直接的方式
+        current_year = datetime.now().year
+        birth_year = current_year - age
+        # 生成该年份的随机日期
+        birth_date = self.dt.date(start=birth_year, end=birth_year)
+        person_dict['birth'] = birth_date.strftime("%Y-%m-%d")
+
+        # 优化身份证号生成
+        person_dict['ID'] = self.identify_code(person_dict['birth'].replace('-', ''))
+
+        return person_dict
+
     # 医疗信息相关
-    def medical_info(self):
+    def medical_info_bak(self):
         medical_dict = dict(
             medrecNo=self.multi_type_number('custom', **dict(mask='######')),  # 病历号
             outPatientNO='',  # 门诊号
@@ -224,6 +295,55 @@ class FakeData:
             mask='########'))
         medical_dict['placerOrderDetailNO'] = medical_dict['placerOrderNO'] + '-1'
         return medical_dict
+
+    def medical_info(self):
+        # 使用更高效的方式生成号码
+        medrec_no = self._generate_custom_number('######')
+        patient_id = self._generate_custom_number('########')
+        placer_order_no = 'plo' + self._generate_custom_number('######')
+        insurance_id = 'YB' + self._generate_custom_number('########')
+
+        medical_dict = {
+            'medrecNo': medrec_no,
+            'outPatientNO': '',
+            'inPatientNO': '',
+            'patientID': patient_id,
+            'invoiceNO': '',
+            'cardSelfNO': '',
+            'placerOrderNO': placer_order_no,
+            'insuranceID': insurance_id,
+            'insuranceType': self.m_random.choice_enum_item(['医保', '农保']),
+            'clinicDiagnosis': '',
+            'symptom': '',
+            'charges': 88.0,
+            'requestDeptName': '申请科室名称',
+            'patientClass': self.m_random.choice_enum_item(self.patient_class_list),
+            'serviceSectID': self.m_random.choice_enum_item(self.service_sect_list),
+            'procedureCode': self.m_random.choice_enum_item(self.procedure_code_list),
+            'procedureName': self.m_random.choice_enum_item(self.procedure_name_list),
+            'organizationCode': 'QWYHZYFZX',
+            'organizationName': '全网云杭州研发中心'
+        }
+
+        # 生成accessionNumber
+        accession_prefix = medical_dict['serviceSectID']
+        accession_suffix = self._generate_custom_number('########')
+        medical_dict['accessionNumber'] = accession_prefix + accession_suffix
+
+        medical_dict['placerOrderDetailNO'] = placer_order_no + '-1'
+        return medical_dict
+
+    def _generate_custom_number(self, mask: str) -> str:
+        """
+        更高效的自定义号码生成方法
+        """
+        result = ''
+        for ch in mask:
+            if ch == '#':
+                result += str(self.numeric.integer_number(1, 9))
+            else:
+                result += ch
+        return result
 
 
 fake_data = FakeData()

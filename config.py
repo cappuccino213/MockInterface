@@ -9,16 +9,6 @@ import os
 import toml
 
 
-# def get_config():
-#     with open("config.toml", "rb") as file:
-#         toml_data = file.read()
-#     data = toml.loads(toml_data.decode('utf8'))
-#     return data
-#
-#
-# CONFIG = get_config()
-
-# 优化解析配置文件方法
 class ConfigManager:
     def __init__(self, file_path):
         """保证config.toml和配置管理模块在同级目录，使得次级模块引入也不会报错"""

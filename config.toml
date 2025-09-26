@@ -15,7 +15,6 @@ process_num = 1 # 进程数
 # locale = "KO" # 韩语环境
 # locale = "RU" # 俄语环境
 
-
 # 数据年份范围
 year.start = 2024
 year.end = 2025
@@ -30,7 +29,7 @@ areacode = ['330109', '330110', '330122', '330127', '330182', '330183', '330185'
              '330302', '330303', '330304', '330322', '330324', '330326', '330327', '330328', '330329', '330381',]
 
 # 返回页面设置，如有
-response.count = 100 # 总数
+response.count = 200# 总数
 response.size = 20 # 页面大小
 response.page = 1 # 当前页
 
@@ -71,7 +70,7 @@ auth_product_info.RequestIP ="192.168.1.110"
 mock_studyinstanceuid = "1.2.840.113619.186.24014628713172.20210609101015387.123"
 
 # 返回条数，目前200
-response_count = 200
+response_count = 20
 
 [ris]
 # 手工匹配通知RIS需要的参数
@@ -85,3 +84,12 @@ auth_product_info.RequestIP ="192.168.1.110"
 
 [token_server]
 token_host = "http://192.168.1.18:8709"
+
+# 数据交换平台参数（从mockup中独立）
+[dep]
+
+# 电子单列表参数
+ele_apply_list.has_multi_examitem = true # 是否含多检查项目
+ele_apply_list.multi_examitem_num = 3 # 多检查项目数量,若含则数量需设置>1
+
+ele_apply_list.response_count = 500 # 返回条数
