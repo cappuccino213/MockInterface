@@ -125,23 +125,28 @@ class FakeData:
     @staticmethod
     def random_time(start_time: Union[str, datetime], end_time: Union[str, datetime]):
         """
-        :param start_time: 2023-07-01 00：00：30
-        :param end_time:2023-07-31 12：01：30
+        :param start_time: 2023-07-01 00:00:30
+        :param end_time: 2023-07-31 12:01:30
         :return:介于start和end之间的时间 datetime类型
         """
-        if type(start_time) == str:
+        if isinstance(start_time, str):
             # 把字符串时间转化成时间格式
             start_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
             end_time = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
-        # 计算出时间范围
-        time_range = (end_time - start_time).days
-        # 随机天数
-        random_day = random.randint(1, time_range)
-        random_time = start_time + timedelta(days=random_day)
-        # print(random_time.strftime("%Y-%m-%d %H:%M:%S"))
-        # return random_time.strftime("%Y-%m-%d %H:%M:%S")
-        return random_time
-        # 参考https://blog.csdn.net/weixin_44679038/article/details/128067554
+
+        # 处理完全相同的时间
+        if start_time == end_time:
+            return start_time
+
+        # 计算时间差（秒级）
+        time_delta = end_time - start_time
+        total_seconds = int(time_delta.total_seconds())
+
+        # 在总秒数范围内随机选择
+        random_seconds = random.randint(0, total_seconds)
+        random_time_result = start_time + timedelta(seconds=random_seconds)
+
+        return random_time_result
 
     # 随机生成日期
 

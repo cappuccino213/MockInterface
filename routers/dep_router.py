@@ -210,11 +210,11 @@ async def get_electronic_list(request_electronic: RequestElectronic):
                         'requestDeptName': new_medical_info['requestDeptName']
                     })
 
-                    # 更新请求日期
-                    multi_result_dict['requestDate'] = fake_data.random_time(
-                        request_electronic.StartTime,
-                        request_electronic.EndTime
-                    ).strftime("%Y-%m-%d %H:%M:%S")
+                    # 更新请求日期 多检查项目理论上检查时间时一样的 所以此处无需更新
+                    # multi_result_dict['requestDate'] = fake_data.random_time(
+                    #     request_electronic.StartTime,
+                    #     request_electronic.EndTime
+                    # ).strftime("%Y-%m-%d %H:%M:%S")
 
                     ele_list.append(ElectronicInfo(**multi_result_dict))
 
