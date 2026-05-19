@@ -36,6 +36,7 @@ def get_electronic_info_with_prepared_data(medical_info, person_info):
         'age': person_info['age'],
         'ageUnit': "",
         'idCard': person_info['ID'],
+        # 'idCard': '1234567899876543',
         'nation': person_info['nation'],
         'nationality': person_info['nationality'],
         'maritalStatus': person_info['maritalStatus'],
@@ -199,11 +200,11 @@ async def get_electronic_list(request_electronic: RequestElectronic):
                     # 创建基于基础数据的新记录，仅更改检查项目相关字段
                     multi_result_dict = base_result_dict.copy()
                     multi_result_dict.update({
-                        'procedureCode': new_medical_info['procedureCode'],
+                        'procedureCode': new_medical_info['procedureCode'], #　注释后生成检查项目ｉｄ就相同
                         'procedureName': new_medical_info['procedureName'],
                         'placerOrderNO': new_medical_info['placerOrderNO'],
                         'placerOrderDetailNO': new_medical_info['placerOrderNO'] + '-1',
-                        'serviceSectID': new_medical_info['serviceSectID'],
+                        # 'serviceSectID': new_medical_info['serviceSectID'],# 检查类型需要相同，则注释掉
                         'clinicDiagnosis': new_medical_info['clinicDiagnosis'],
                         'symptom': new_medical_info['symptom'],
                         'charges': new_medical_info['charges'],

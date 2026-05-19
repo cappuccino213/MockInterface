@@ -1,43 +1,37 @@
+
 # toml官网https://toml.io/cn/
 
 # 运行参数
 [uvicorn]
 port = 8888
-reload = true # 是否重载
+reload = false # 是否重载
 process_num = 1 # 进程数
 
 # 模拟数据参数
 [mockup]
 # 数据地域设置
 # locale = "EN" # 英语环境
- locale = "ZH" # 中文环境
+ locale = "RU" # 中文环境
 # locale = "JA" # 日语环境
 # locale = "KO" # 韩语环境
 # locale = "RU" # 俄语环境
 
 # 数据年份范围
-year.start = 2024
-year.end = 2025
+areacode = ["330109", "330110", "330122", "330127", "330182", "330183", "330185", "330200", "330203", "330204", "330205", "330206", "330211", "330212", "330225", "330226", "330281", "330282", "330283", "330300", "330302", "330303", "330304", "330322", "330324", "330326", "330327", "330328", "330329", "330381"]
+[mockup.year]
+start = 2025
+end = 2026
 
-# 年龄范围
-age.start = 0
-age.end = 105
+[mockup.age]
+start = 2
+end = 105
 
-# 行政区域代码，用于身份证前6位,随意配置真实的代码
-areacode = ['330109', '330110', '330122', '330127', '330182', '330183', '330185', '330200', '330203', '330204',
-             '330205', '330206', '330211', '330212', '330225', '330226', '330281', '330282', '330283', '330300',
-             '330302', '330303', '330304', '330322', '330324', '330326', '330327', '330328', '330329', '330381',]
-
-# 返回页面设置，如有
-response.count = 200# 总数
-response.size = 20 # 页面大小
-response.page = 1 # 当前页
-
-# 代理参数
-# 反向代理到真实的服务器（比如需要真实token或者难以mock的又需要真实逻辑的接口）
+[mockup.response]
+count = 200
+size = 20
+page = 1
 [proxy]
 token_host = "http://192.168.1.18:8709"
-
 archive_host = "http://192.168.1.18:8188"
 #archive_host = "http://192.168.1.59:7032"
 
@@ -70,7 +64,7 @@ auth_product_info.RequestIP ="192.168.1.110"
 mock_studyinstanceuid = "1.2.840.113619.186.24014628713172.20210609101015387.123"
 
 # 返回条数，目前200
-response_count = 20
+response_count = 100
 
 [ris]
 # 手工匹配通知RIS需要的参数
@@ -90,6 +84,26 @@ token_host = "http://192.168.1.18:8709"
 
 # 电子单列表参数
 ele_apply_list.has_multi_examitem = true # 是否含多检查项目
-ele_apply_list.multi_examitem_num = 3 # 多检查项目数量,若含则数量需设置>1
+ele_apply_list.multi_examitem_num = 4 # 多检查项目数量,若含则数量需设置>1
+ele_apply_list.response_count = 10 # 返回条数
 
-ele_apply_list.response_count = 500 # 返回条数
+# 管理后台配置
+[admin]
+session_secret = "mockinterface-admin-session-key-change-in-production" # Session 密钥，请修改为随机字符串
+#session_timeout = 3600 # Session 超时时间（秒）
+# 字段选项配置（用于下拉选择等）
+[admin.field_options]
+# locale 下拉选项：value 为实际值，label 为显示文本
+locale = [
+    {value = "EN", label = "英语环境"},
+    {value = "ZH", label = "中文环境"},
+    {value = "JA", label = "日语环境"},
+    {value = "KO", label = "韩语环境"},
+    {value = "RU", label = "俄语环境"}
+]
+
+[logging]
+enable_file = true
+log_dir = "logs"
+log_file = "app.log"
+level = "INFO"

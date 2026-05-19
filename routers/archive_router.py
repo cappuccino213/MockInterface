@@ -12,15 +12,12 @@ from response_model import CompareFailList, StudyData, QASuccessResponse, QAFail
 from utility import *
 
 from typing import Optional
+from config import get_current_config
 
 """接口定义"""
 archive_route = APIRouter(tags=['Archive'])
 
-real_archive_host = CONFIG['proxy']['archive_host']
-
-archive_config = CONFIG['archive']
-
-ris_config = CONFIG['ris']
+# 注意：不再在模块级别引用 CONFIG，而是在函数内部动态获取
 
 
 # 定义一个依赖项来从Authorization请求头中提取token
@@ -32,6 +29,8 @@ async def get_token_from_header(authorization: Optional[str] = Header(None)):
 
 def fake_compare_failed_list(request_body: RequestFailedStudy) -> StudyData:
     """根据请求参数构造一个模拟的 StudyData 对象"""
+    config = get_current_config()
+    archive_config = config.get('archive', {})
 
     def get_modality():
         if request_body.ExamType:
@@ -42,7 +41,7 @@ def fake_compare_failed_list(request_body: RequestFailedStudy) -> StudyData:
 
     # 基础字段映射规则：如果存在则取用户输入，否则 mock
     base_fields = {
-        'organizationCode': lambda: request_body.OrganizationCode or archive_config.get("auth_product_info").get("HospitalCode"),
+        'organizationCode': lambda: request_body.OrganizationCode or archive_config.get("auth_product_info",{}).get("HospitalCode"),
         'accessionNumber': lambda: request_body.AccessionNumber or fake_data.multi_type_number('custom', mask='#######'),
         'patientId': lambda: request_body.PatientID or fake_data.multi_type_number('custom', mask='FS#####'),
         'patientName': lambda: request_body.PatientName or fake_data.person_info()['name'],
@@ -77,9 +76,10 @@ def fake_compare_failed_list(request_body: RequestFailedStudy) -> StudyData:
 
 # 获取archive的token
 def get_internal_token():
-    auth_info = CONFIG['ris']['auth_product_info'] # 这里需要用被调用方的产品信息
+    config = get_current_config()
+    auth_info = config['ris']['auth_product_info'] # 这里需要用被调用方的产品信息
     result = TokenHandle().get_token_value(auth_info)
-    print(f"INFO:     获取{CONFIG['ris']['auth_product_info']}的token信息：{result}")
+    print(f"INFO:     获取{config['ris']['auth_product_info']}的token信息：{result}")
     # return result.get('token').split(" ")[1]
     # 需要完整的token，所以不截取
     return result.get('token')
@@ -119,9 +119,13 @@ def notify_ris_archive_complete(ris_url:str, request_body: dict):
 def do_manual_match(request:Request,request_body: RequestDoManualMatch = Body(...)):
     """
     接收手工比对数据,增加自动通知QA完成逻辑
-    这里的请求方必须是真实的RIS服务，不能用接口工具测试，因为以下回通过请求获取地址，如果不在请求方的机器上使用接口测试，
+    这里的请求方必须是真实的RIS服务，不能用接口工具测试，因为以下会通过请求获取地址，如果不在请求方的机器上使用接口测试，
     会导致获取的client_host，造成通知QA错误
     """
+    config = get_current_config()
+    ris_config = config.get('ris')
+    archive_config = config.get('archive')
+    
     client_host = ris_config.get('ris_url')
     # 配置从获取RIS服务端口信息
     client_port = ris_config.get('ris_port')
@@ -129,7 +133,7 @@ def do_manual_match(request:Request,request_body: RequestDoManualMatch = Body(..
     client_url = f"{client_host}:{client_port}"
     print(f"INFO:     手工匹配的请求方地址为:{client_url}")
     # 模拟的study_uid,若未获取到使用默认值
-    mock_study_uid = CONFIG.get('archive').get('mock_studyinstanceuid',"1.2.194.0.108707908.20240730075934.1413.16898.1234567")
+    mock_study_uid = config.get('archive',{}).get('mock_studyinstanceuid',"1.2.194.0.108707908.20240730075934.1413.16898.1234567")
 
     # 构建通知参数
     notify_request_params = {
@@ -137,7 +141,7 @@ def do_manual_match(request:Request,request_body: RequestDoManualMatch = Body(..
         "AccessionNumber": request_body.MatchedData.AccessionNumber,
         "PatientID": request_body.MatchedData.PatientId,
         "MedrecNo": "",
-        "OrganizationCode": archive_config.get("auth_product_info").get("HospitalCode"),
+        "OrganizationCode": archive_config.get("auth_product_info",{}).get("HospitalCode"),
         "AETitle": "mock_ae",
         # "OrganizationGuid": "3a0e58e2-da00-4a7a-bbdc-58a4bb3aaa81",
         "ObservationDate": datetime.now().strftime("%Y/%m/%d %H:%M:%S")
@@ -154,6 +158,8 @@ def do_manual_match(request:Request,request_body: RequestDoManualMatch = Body(..
 @archive_route.post('/Exchange/GetCompareFailedStudy', name="获取QA阻塞列表", response_model=CompareFailList)
 async def get_compare_failed_study(request_body: RequestFailedStudy = Body(...)):
     """增加根据入参返回数据的逻辑"""
+    config = get_current_config()
+    archive_config = config.get("archive", {})
     result_count = archive_config.get("response_count",20) # 从配置文件中获取返回结果数量，默认20
     study_list = [fake_compare_failed_list(request_body) for _ in range(result_count)]
     return CompareFailList(code=1, data=study_list, message="Success")
@@ -161,13 +167,15 @@ async def get_compare_failed_study(request_body: RequestFailedStudy = Body(...))
 
 
 """以下是转接真实存档路由"""
-@archive_route.post('/Exchange/ImportOrders', name="上传检查申请单", description=f"实际访问地址 {real_archive_host}")
+@archive_route.post('/Exchange/ImportOrders', name="上传检查申请单")
 async def import_orders(request_body: RequestImportOrders = Body(...), token=Depends(get_token_from_header)):
     """
     :param request_body: Body表示请求体
     :param token: Header表示请求头
     :return:
     """
+    config = get_current_config()
+    real_archive_host = config['proxy']['archive_host']
     real_api = f"{real_archive_host}/Exchange/ImportOrders"
     headers = {"Authorization": token, "Content-Type": "application/json"}
     response = requests.post(real_api, json=request_body.model_dump(), headers=headers)
@@ -176,10 +184,11 @@ async def import_orders(request_body: RequestImportOrders = Body(...), token=Dep
     print(f"warning:{response.status_code, response.text}")
 
 
-@archive_route.post('/Exchange/GetStudyApplyImage', name="获取检查申请单",
-                    description=f"实际访问地址 {real_archive_host}")
+@archive_route.post('/Exchange/GetStudyApplyImage', name="获取检查申请单")
 async def get_study_apply_image(request_body: RequestGetStudyApplyImage = Body(...),
                                 token=Depends(get_token_from_header)):
+    config = get_current_config()
+    real_archive_host = config['proxy']['archive_host']
     real_api = f"{real_archive_host}/Exchange/GetStudyApplyImage"
     headers = {"Authorization": token, "Content-Type": "application/json"}
     response = requests.post(real_api, json=request_body.model_dump(), headers=headers)
@@ -189,5 +198,6 @@ async def get_study_apply_image(request_body: RequestGetStudyApplyImage = Body(.
 
 
 if __name__ == "__main__":
-    print(f"TEST 存档配置信息:{archive_config}")
-    print(f"TEST:{CONFIG['ris']['auth_product_info']}")
+    config = get_current_config()
+    print(f"TEST 存档配置信息:{config.get('archive')}")
+    print(f"TEST:{config['ris']['auth_product_info']}")

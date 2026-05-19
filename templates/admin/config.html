@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配置管理 - MockInterface</title>
+    <link rel="stylesheet" href="/static/admin/admin.css">
+    <style>
+        /* 基础重置 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-title .icon {
+            font-size: 24px;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .btn-logout:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Tab 导航 */
+        .tab-nav {
+            background: white;
+            padding: 0 24px;
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid #e1e1e1;
+            overflow-x: auto;
+        }
+        .tab-item {
+            padding: 14px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .tab-item:hover {
+            color: #667eea;
+        }
+        .tab-item.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        /* 工具栏 */
+        .toolbar {
+            background: white;
+            padding: 16px 24px;
+            display: flex;
+            gap: 12px;
+            border-bottom: 1px solid #e1e1e1;
+            align-items: center;
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #ff3344;
+        }
+        .btn-success {
+            background: #2ed573;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #26b863;
+        }
+        .toolbar-info {
+            margin-left: auto;
+            color: #999;
+            font-size: 13px;
+        }
+
+        /* 配置表格 */
+        .config-content {
+            padding: 24px;
+            max-width: 1200px;
+        }
+        .config-section {
+            display: none;
+        }
+        .config-section.active {
+            display: block;
+        }
+        .config-table {
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .config-table th,
+        .config-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .config-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            width: 200px;
+        }
+        .config-table tr:last-child td,
+        .config-table tr:last-child th {
+            border-bottom: none;
+        }
+        .config-table tr:hover {
+            background: #fafafa;
+        }
+        .config-key {
+            font-family: 'Monaco', 'Menlo', monospace;
+            color: #667eea;
+            font-weight: 500;
+        }
+        .config-type {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+            margin-left: 8px;
+        }
+
+        /* 输入控件 */
+        .input-text {
+            width: 300px;
+            padding: 8px 12px;
+            border: 1px solid #e1e1e1;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        .input-text:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .input-number {
+            width: 150px;
+            padding: 8px 12px;
+            border: 1px solid #e1e1e1;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .input-number:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .input-array {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px 12px;
+            border: 1px solid #e1e1e1;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            resize: vertical;
+        }
+        .input-array:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        select.input-select {
+            padding: 8px 12px;
+            border: 1px solid #e1e1e1;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        /* Toast 提示 */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 14px 24px;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast.success { background: #2ed573; }
+        .toast.error { background: #ff4757; }
+
+        /* 确认弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            display: none;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 400px;
+            text-align: center;
+        }
+        .modal h3 {
+            margin-bottom: 12px;
+        }
+        .modal p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        /* 日志弹窗 */
+        .log-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 1000;
+        }
+        .log-modal-overlay.show {
+            display: flex;
+        }
+        .log-modal {
+            background: white;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 90%;
+            max-height: 80vh;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .log-modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e1e1e1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .log-modal-header h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+        .log-info {
+            font-size: 12px;
+            color: #666;
+        }
+        .log-modal-body {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .log-toolbar {
+            padding: 12px 20px;
+            border-bottom: 1px solid #e1e1e1;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .log-content {
+            flex: 1;
+            overflow: auto;
+            padding: 16px 20px;
+            background: #1e1e1e;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #d4d4d4;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin: 0;
+            max-height: 50vh;
+        }
+        .log-modal-footer {
+            padding: 12px 20px;
+            border-top: 1px solid #e1e1e1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .log-lines-select {
+            padding: 6px 12px;
+            border: 1px solid #e1e1e1;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .btn-close {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-close:hover {
+            background: #5a6268;
+        }
+        .btn-refresh {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-refresh:hover {
+            background: #5a6fd6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <header class="header">
+        <div class="header-title">
+            <span class="icon">&#9881;</span>
+            MockInterface 配置管理中心
+        </div>
+        <div class="header-actions">
+            <button class="btn-logout" onclick="logout()">&#128682; 退出登录</button>
+        </div>
+    </header>
+
+    <!-- Tab 导航 -->
+    <nav class="tab-nav" id="tabNav">
+        <!-- tabs 动态生成 -->
+    </nav>
+
+    <!-- 工具栏 -->
+    <div class="toolbar">
+        <button class="btn btn-primary" onclick="saveAllConfig()">
+            &#128190; 保存配置
+        </button>
+        <button class="btn btn-danger" onclick="confirmRestart()">
+            &#128260; 重启服务
+        </button>
+        <button class="btn" onclick="openLogModal()" style="background:#6c757d;color:white;">
+            &#128196; 查看日志
+        </button>
+        <span class="toolbar-info" id="statusInfo">就绪</span>
+    </div>
+
+    <!-- 配置内容区 -->
+    <main class="config-content" id="configContent">
+        <!-- 配置表格动态生成 -->
+    </main>
+
+    <!-- Toast 提示 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 确认弹窗 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h3>确认重启服务</h3>
+            <p>重启将先保存所有修改的配置，是否继续？</p>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="doRestart()">确认重启</button>
+                <button class="btn" onclick="closeModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 日志查看弹窗 -->
+    <div class="log-modal-overlay" id="logModal">
+        <div class="log-modal">
+            <div class="log-modal-header">
+                <h3>&#128196; 运行日志</h3>
+                <span class="log-info" id="logInfo"></span>
+            </div>
+            <div class="log-modal-body">
+                <div class="log-toolbar">
+                    <select class="log-lines-select" id="logLinesSelect" onchange="loadLogs()">
+                        <option value="50">最近 50 行</option>
+                        <option value="100" selected>最近 100 行</option>
+                        <option value="200">最近 200 行</option>
+                        <option value="500">最近 500 行</option>
+                        <option value="1000">最近 1000 行</option>
+                    </select>
+                    <button class="btn-refresh" onclick="loadLogs()">&#128260; 刷新</button>
+                </div>
+                <pre class="log-content" id="logContent">加载中...</pre>
+            </div>
+            <div class="log-modal-footer">
+                <span class="log-info" id="logFooter"></span>
+                <button class="btn-close" onclick="closeLogModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let configData = {};
+        let fieldOptions = {};
+        let activeSection = null;
+        let pendingChanges = false;
+
+        // 获取 token
+        function getToken() {
+            return localStorage.getItem('admin_token');
+        }
+
+        // 带认证的 fetch
+        async function authFetch(url, options = {}) {
+            const token = getToken();
+            const headers = options.headers || {};
+            if (token) {
+                headers['Authorization'] = 'Bearer ' + token;
+            }
+            return fetch(url, { ...options, headers });
+        }
+
+        // 初始化
+        async function init() {
+            const token = getToken();
+            if (!token) {
+                window.location.href = '/admin/login';
+                return;
+            }
+
+            try {
+                // 加载配置
+                const resp = await authFetch('/admin/api/config');
+                if (resp.status === 401) {
+                    localStorage.removeItem('admin_token');
+                    window.location.href = '/admin/login';
+                    return;
+                }
+                configData = await resp.json();
+
+                // 加载字段选项
+                const resp2 = await authFetch('/admin/api/field-options');
+                if (resp2.ok) {
+                    fieldOptions = await resp2.json();
+                }
+
+                // 检查热重载状态
+                await checkHotReloadStatus();
+
+                renderTabs();
+                if (Object.keys(configData).length > 0) {
+                    switchTab(Object.keys(configData)[0]);
+                }
+            } catch (err) {
+                showToast('加载配置失败', 'error');
+            }
+        }
+
+        // 检查热重载状态
+        async function checkHotReloadStatus() {
+            try {
+                const resp = await authFetch('/admin/api/hot-reload/status');
+                if (resp.ok) {
+                    const result = await resp.json();
+                    if (result.success && result.enabled) {
+                        document.getElementById('statusInfo').textContent = 
+                            `✅ 配置热重载已启用（${result.check_interval}秒检查）`;
+                    } else {
+                        document.getElementById('statusInfo').textContent = 
+                            '⚠️ 配置热重载未启用，修改配置需重启服务';
+                    }
+                }
+            } catch (e) {
+                console.error('检查热重载状态失败:', e);
+            }
+        }
+
+        // 页面加载时执行初始化
+        document.addEventListener('DOMContentLoaded', init);
+
+        // 渲染 Tab
+        function renderTabs() {
+            const nav = document.getElementById('tabNav');
+            nav.innerHTML = Object.keys(configData).map(key => `
+                <div class="tab-item${key === activeSection ? ' active' : ''}" onclick="switchTab('${key}')">
+                    ${key}
+                </div>
+            `).join('');
+        }
+
+        // 切换 Tab
+        function switchTab(section) {
+            activeSection = section;
+            renderTabs();
+            renderConfigTable(section);
+        }
+
+        // 渲染配置表格
+        function renderConfigTable(section) {
+            const content = document.getElementById('configContent');
+            const sectionData = configData[section] || {};
+
+            let html = `<div class="config-section active">`;
+            html += `<table class="config-table">`;
+            html += `<thead><tr><th>配置项</th><th>值</th></tr></thead>`;
+            html += `<tbody>`;
+
+            for (const [key, data] of Object.entries(sectionData)) {
+                html += `<tr>`;
+                html += `<th>${key}<span class="config-type">${data.type}</span></th>`;
+                html += `<td>${renderInput(section, key, data)}</td>`;
+                html += `</tr>`;
+            }
+
+            html += `</tbody></table></div>`;
+            content.innerHTML = html;
+        }
+
+        // 渲染输入控件
+        function renderInput(section, key, data) {
+            const value = data.value;
+            const name = `${section}__${key}`;
+
+            // 检查是否有预设选项
+            const fullKey = `${section}.${key}`;
+            const options = fieldOptions[key] || fieldOptions[fullKey];
+
+            // 特殊处理 locale 字段
+            if (options && Array.isArray(options)) {
+                const optionsHtml = options.map(opt =>
+                    `<option value="${opt.value}" ${value === opt.value ? 'selected' : ''}>${opt.label}</option>`
+                ).join('');
+                return `<select class="input-select has-options" name="${name}" data-section="${section}" data-key="${key}">
+                    ${optionsHtml}
+                </select>`;
+            }
+
+            switch (data.type) {
+                case 'bool':
+                    return `<select class="input-select" name="${name}" data-section="${section}" data-key="${key}">
+                        <option value="true" ${value === true ? 'selected' : ''}>是 (true)</option>
+                        <option value="false" ${value === false ? 'selected' : ''}>否 (false)</option>
+                    </select>`;
+
+                case 'int':
+                case 'float':
+                    return `<input type="number" class="input-number" name="${name}" value="${value}"
+                        data-section="${section}" data-key="${key}" step="${data.type === 'float' ? '0.01' : '1'}">`;
+
+                case 'array':
+                    const arrayStr = Array.isArray(value) ? JSON.stringify(value) : value;
+                    return `<textarea class="input-array" name="${name}" data-section="${section}" data-key="${key}"
+                        placeholder="JSON 数组格式，如: ['a', 'b']">${arrayStr}</textarea>`;
+
+                default:
+                    return `<input type="text" class="input-text" name="${name}" value="${value}"
+                        data-section="${section}" data-key="${key}">`;
+            }
+        }
+
+        // 收集所有修改
+        function collectChanges() {
+            const changes = {};
+            document.querySelectorAll('[data-section][data-key]').forEach(el => {
+                const section = el.dataset.section;
+                const key = el.dataset.key;
+                let value = el.value;
+
+                if (!changes[section]) changes[section] = {};
+
+                // 类型转换
+                if (el.classList.contains('input-number')) {
+                    value = el.step.includes('.') ? parseFloat(value) : parseInt(value);
+                } else if (el.classList.contains('input-array')) {
+                    try {
+                        value = JSON.parse(value);
+                    } catch (e) {
+                        value = el.value;
+                    }
+                } else if (el.classList.contains('input-select') && !el.classList.contains('has-options')) {
+                    value = value === 'true';
+                }
+
+                changes[section][key] = value;
+            });
+            return changes;
+        }
+
+        // 保存配置
+        async function saveAllConfig() {
+            const changes = collectChanges();
+            let success = true;
+
+            for (const [section, config] of Object.entries(changes)) {
+                try {
+                    const resp = await authFetch(`/admin/api/config/${section}`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(config)
+                    });
+                    const result = await resp.json();
+                    if (!result.success) {
+                        success = false;
+                        showToast(result.message, 'error');
+                    }
+                } catch (err) {
+                    success = false;
+                    showToast(`保存 ${section} 失败`, 'error');
+                }
+            }
+
+            if (success) {
+                showToast('所有配置已保存', 'success');
+                document.getElementById('statusInfo').textContent = `已保存于 ${new Date().toLocaleTimeString()}`;
+            }
+        }
+
+        // 确认重启
+        function confirmRestart() {
+            document.getElementById('modalOverlay').classList.add('show');
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('show');
+        }
+
+        // 执行重启
+        async function doRestart() {
+            closeModal();
+            showToast('正在保存配置并重启...', 'success');
+
+            // 先保存
+            await saveAllConfig();
+
+            // 延迟后重启
+            setTimeout(async () => {
+                try {
+                    const resp = await authFetch('/admin/api/restart', {method: 'POST'});
+                    const result = await resp.json();
+                    
+                    if (result.success) {
+                        showToast('服务正在重启，请稍后刷新页面...', 'success');
+                        document.getElementById('statusInfo').textContent = '服务重启中...';
+                        
+                        // 禁用重启按钮，防止重复点击
+                        const restartBtn = document.querySelector('.btn-danger');
+                        if (restartBtn) {
+                            restartBtn.disabled = true;
+                            restartBtn.textContent = '服务重启中...';
+                        }
+                        
+                        // 3秒后提示刷新页面
+                        setTimeout(() => {
+                            showToast('服务已重启，请刷新页面或重新登录', 'success');
+                        }, 3000);
+                    } else {
+                        showToast('重启失败: ' + result.message, 'error');
+                    }
+                } catch (e) {
+                    showToast('重启请求失败', 'error');
+                }
+            }, 500);
+        }
+
+        // 登出
+        function logout() {
+            localStorage.removeItem('admin_token');
+            window.location.href = '/admin/login';
+        }
+
+        // Toast 提示
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // 打开日志弹窗
+        async function openLogModal() {
+            const modal = document.getElementById('logModal');
+            modal.classList.add('show');
+            await loadLogInfo();
+            await loadLogs();
+        }
+
+        // 关闭日志弹窗
+        function closeLogModal() {
+            document.getElementById('logModal').classList.remove('show');
+        }
+
+        // 加载日志文件信息
+        async function loadLogInfo() {
+            try {
+                const resp = await authFetch('/admin/api/logs/info');
+                const result = await resp.json();
+                if (result.success && result.exists) {
+                    document.getElementById('logInfo').textContent =
+                        `${result.path} | 大小: ${result.size_formatted} | 修改: ${result.modified}`;
+                } else {
+                    document.getElementById('logInfo').textContent = '日志文件不存在';
+                }
+            } catch (e) {
+                document.getElementById('logInfo').textContent = '无法获取日志信息';
+            }
+        }
+
+        // 加载日志内容
+        async function loadLogs() {
+            const lines = document.getElementById('logLinesSelect').value;
+            const contentEl = document.getElementById('logContent');
+            const footerEl = document.getElementById('logFooter');
+
+            contentEl.textContent = '加载中...';
+
+            try {
+                const resp = await authFetch(`/admin/api/logs?lines=${lines}`);
+                const result = await resp.json();
+
+                if (result.success) {
+                    contentEl.textContent = result.logs || '(无日志内容)';
+                    footerEl.textContent = `共 ${result.total_lines} 行，显示 ${result.displayed_lines} 行`;
+                } else {
+                    contentEl.textContent = '加载失败: ' + (result.error || '未知错误');
+                    footerEl.textContent = '';
+                }
+            } catch (e) {
+                contentEl.textContent = '加载失败: ' + e.message;
+                footerEl.textContent = '';
+            }
+        }
+
+        // 点击弹窗外部关闭
+        document.getElementById('logModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLogModal();
+            }
+        });
+    </script>
+</body>
+</html>

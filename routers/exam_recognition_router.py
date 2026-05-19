@@ -18,10 +18,10 @@ rec_config = CONFIG.get("business").get("recognition")
 
 # 定义一个依赖项来获取请求头
 def validate_request_header(
-        clientId: str = Header(..., title="clientId", regex=r"^\S+$"),  # 使用正则表达式确保是非空字符串
-        orgCode: str = Header(..., title="orgCode", regex=r"^\S+$"),
-        timestamp: str = Header(..., title="timestamp", regex=r"^\d+$"),  # 假设时间戳是数字字符串
-        sign: str = Header(..., title="sign", regex=r"^\S+$")):
+        clientId: str = Header(..., title="clientId", pattern=r"^\S+$"),  # 使用正则表达式确保是非空字符串
+        orgCode: str = Header(..., title="orgCode", pattern=r"^\S+$"),
+        timestamp: str = Header(..., title="timestamp", pattern=r"^\d+$"),  # 假设时间戳是数字字符串
+        sign: str = Header(..., title="sign", pattern=r"^\S+$")):
     try:
         # 验证签名和机构
         if sign == rec_config["sign"] and orgCode == rec_config["org_code"]:

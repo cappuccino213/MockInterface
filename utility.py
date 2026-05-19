@@ -26,7 +26,7 @@ from mimesis import Cryptographic
 from mimesis.locales import Locale
 from mimesis import Datetime
 
-from config import CONFIG
+from config import get_current_config
 from request_model import APIRequestProxy
 
 """工具模块"""
@@ -35,8 +35,13 @@ from request_model import APIRequestProxy
 # mock数据
 class FakeData:
     def __init__(self):
-        # 从配置读取地域设置
-        locale_str = CONFIG.get('mockup').get('locale','ZH') # 默认中文
+        self._reload_config()
+    
+    def _reload_config(self):
+        """重新加载配置并更新内部对象"""
+        # 从配置读取地域设置（使用动态配置）
+        config = get_current_config()
+        locale_str = config.get('mockup',{}).get('locale','ZH') # 默认中文
         locale = Locale[locale_str]
         self.person = Person(locale)
         self.dt = Datetime(Locale.ZH) # 时间对象暂时不变，看后续需求
@@ -50,7 +55,7 @@ class FakeData:
         self.marital_status_list = ['已婚', '未婚']
         self.nation_list = ['汉族']
         self.nationality_list = ['中华人民共和国']
-        self.areacode_list = CONFIG['mockup']['areacode']
+        self.areacode_list = config['mockup']['areacode']
         self.sequence_code_list = [str(code) for code in range(100, 300)]
         self.check_code_list = [str(i) for i in range(10)] + ['X']
 
@@ -150,13 +155,20 @@ class FakeData:
 
     # 随机生成日期
 
-    def random_date(self, start: int = CONFIG['mockup']['year']['start'],
-                    end: int = CONFIG['mockup']['year']['end']):
+    def random_date(self, start: int = None,
+                    end: int = None):
         """
         :param start: 开始年份
         :param end: 结束年份
         :return: 随机生成指定年份的日期
         """
+        # 如果未提供参数，从当前配置获取
+        if start is None or end is None:
+            config = get_current_config()
+            if start is None:
+                start = config['mockup']['year']['start']
+            if end is None:
+                end = config['mockup']['year']['end']
         return self.dt.date(start=start, end=end).strftime("%Y-%m-%d")
 
     # 日期区间生成日期
@@ -202,7 +214,8 @@ class FakeData:
         :param birth: 出生日期8位,格式为20000214
         :return: 18位身份证号
         """
-        areacode = self.random_string(CONFIG['mockup']['areacode'])
+        config = get_current_config()
+        areacode = self.random_string(config['mockup']['areacode'])
         # 3位顺序码
         sequence_code = self.random_string([str(code) for code in (100, 300)])
         # 校验码，实际校验码需要根据前17位进行加权计算的，这里我们建议枚举处理
@@ -221,9 +234,10 @@ class FakeData:
 
     # 具体业务数据
     def person_info_bak(self):
+        config = get_current_config()
         person_dict = dict(name=self.person.full_name(reverse=True).replace(' ', ''),
                            sex=self.person.sex(),
-                           age=self.numeric.integer_number(CONFIG['mockup']['age']['start'], CONFIG['mockup']['age']['end']),
+                           age=self.numeric.integer_number(config['mockup']['age']['start'], config['mockup']['age']['end']),
                            ageUnit='岁',
                            phone=self.m_random.choice_enum_item(self.tel_phone_header) + self.person.phone_number(
                                '########'),
@@ -234,14 +248,15 @@ class FakeData:
         person_dict['birth'] = (datetime.now().date() - relativedelta(years=person_dict['age'])).strftime(
             "%Y-%m-%d")
         person_dict['ID'] = self.identify_code(person_dict['birth'].replace('-', ''))
-
+    
         return person_dict
 
     def person_info(self):
+        config = get_current_config()
         # 预生成基本信息
         full_name = self.person.full_name(reverse=True).replace(' ', '')
         sex = self.person.sex()
-        age = self.numeric.integer_number(CONFIG['mockup']['age']['start'], CONFIG['mockup']['age']['end'])
+        age = self.numeric.integer_number(config['mockup']['age']['start'], config['mockup']['age']['end'])
 
         person_dict = {
             'name': full_name,
@@ -424,7 +439,10 @@ class HttpProxy:
 
 # 令牌处理类
 class TokenHandle:
-    TOKEN_HOST = CONFIG['token_server']['token_host']
+    def __init__(self):
+        # 动态获取配置
+        config = get_current_config()
+        self.TOKEN_HOST = config['token_server']['token_host']
 
     # AUTH_INFO = CONFIG['archive']['auth_product_info']
     # 获取令牌
