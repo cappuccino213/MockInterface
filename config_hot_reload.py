@@ -90,6 +90,10 @@ class ConfigHotReload:
                     # 重新加载配置
                     with self._config_lock:
                         try:
+                            import copy
+                            # 保存旧配置的深拷贝，避免引用问题
+                            old_config = copy.deepcopy(self._current_config) if self._current_config else None
+                            
                             # 强制重新加载
                             self.config_manager._load_config()
                             new_config = self.config_manager.get_config()
@@ -98,10 +102,10 @@ class ConfigHotReload:
                             
                             print(f"[ConfigHotReload] 配置重新加载成功")
                             
-                            # 通知所有回调函数
+                            # 通知所有回调函数，传递旧配置和新配置
                             for callback in self._callbacks:
                                 try:
-                                    callback(new_config)
+                                    callback(old_config, new_config)
                                 except Exception as e:
                                     print(f"[ConfigHotReload] 回调函数执行失败: {e}")
                         

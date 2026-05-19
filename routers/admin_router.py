@@ -346,16 +346,36 @@ async def restart_service(authorization: Optional[str] = Header(None)):
 
             print("\n[Restart] 正在启动新进程...")
 
+            # ========== ProcessPilot Support ==========
+            is_managed = os.environ.get('PROCESSPILOT_MANAGED') == '1'
+            if is_managed:
+                print("[Restart] Managed by ProcessPilot, exiting...")
+                os._exit(0)
+            # ==========================================
+
+
             if platform.system() == 'Windows':
-                # Windows: 使用 DETACHED_PROCESS 让新进程独立运行
-                DETACHED_PROCESS = 0x00000008
-                subprocess.Popen(
-                    cmd,
-                    creationflags=DETACHED_PROCESS,
-                    cwd=os.getcwd(),
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
-                )
+                # 检查是否是 Nuitka 打包的 exe
+                is_frozen = getattr(sys, 'frozen', False)
+                
+                if is_frozen:
+                    # Nuitka 打包的 exe：使用 start 命令在新窗口中启动
+                    exe_path = sys.executable
+                    # /D 指定起始目录，/K 保持窗口打开
+                    start_cmd = f'start "MockInterface" cmd /D "{os.getcwd()}" /K ""{exe_path}""'
+                    print(f"[Restart] 启动命令: {start_cmd}")
+                    print(f"[Restart] 工作目录: {os.getcwd()}")
+                    subprocess.Popen(start_cmd, shell=True)
+                    print("[Restart] 新进程已在新窗口中启动")
+                else:
+                    # Python 脚本：使用 start 命令在新窗口中启动
+                    python_path = sys.executable
+                    main_path = os.path.abspath('main.py')
+                    start_cmd = f'start "MockInterface" cmd /D "{os.getcwd()}" /K ""{python_path}" "{main_path}""'
+                    print(f"[Restart] 启动命令: {start_cmd}")
+                    print(f"[Restart] 工作目录: {os.getcwd()}")
+                    subprocess.Popen(start_cmd, shell=True)
+                    print("[Restart] 新进程已在新窗口中启动")
             else:
                 # Unix/Linux/Mac: 使用 start_new_session
                 subprocess.Popen(
@@ -364,8 +384,9 @@ async def restart_service(authorization: Optional[str] = Header(None)):
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL
                 )
+                print("[Restart] 新进程已启动...")
 
-            print("[Restart] 新进程已启动，当前进程即将退出...")
+            print("[Restart] 当前进程即将退出...")
 
         # 在后台线程中执行延迟重启
         thread = threading.Thread(target=delayed_restart, daemon=True)
