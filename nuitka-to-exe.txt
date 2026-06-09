@@ -1,0 +1,30 @@
+python.exe -m nuitka --standalone -j8 ^
+    --follow-imports ^
+    --nofollow-import-to=tkinter ^
+    --nofollow-import-to=numpy ^
+    --nofollow-import-to=PIL ^
+    --nofollow-import-to=setuptools ^
+    --nofollow-import-to=pip ^
+    --nofollow-import-to=test ^
+    --nofollow-import-to=tests ^
+    --nofollow-import-to=unittest ^
+    --windows-icon-from-ico=static/mock.png ^
+    --output-dir=output/MockInterface ^
+    --output-filename=MockInterface.exe ^
+    --remove-output ^
+    --include-data-file=config.toml=config.toml ^
+    --include-data-file=.admin_password=routers/.admin_password ^
+    --include-data-dir=static=static ^
+    --noinclude-data-file=static/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb ^
+    --include-data-dir=templates=templates ^
+    --include-data-dir=.venv\Lib\site-packages\mimesis=mimesis ^
+    --include-package=fastapi ^
+    --include-package=uvicorn ^
+    --include-package=starlette ^
+    --include-package=pydantic ^
+    --include-package=jinja2 ^
+    --include-package=markupsafe ^
+    --include-package=tomlkit ^
+    --include-package=mimesis ^
+    --include-module=main ^
+main.py
